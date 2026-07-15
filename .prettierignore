@@ -5,3 +5,5 @@ test-results
 graphify-out
 package-lock.json
 .codex/**
+.council.yaml
+.council/**

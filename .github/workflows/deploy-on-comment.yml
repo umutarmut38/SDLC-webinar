@@ -1,0 +1,167 @@
+name: Deploy demo from PR comment
+run-name: Deploy PR #${{ github.event.issue.number }} at ${{ github.event.comment.created_at }}
+
+on:
+  issue_comment:
+    types:
+      - created
+
+concurrency:
+  group: deploy-demo-pr-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+  issues: write
+  pull-requests: read
+
+jobs:
+  deploy:
+    name: Validate and deploy demo
+    if: >-
+      github.event.issue.pull_request &&
+      (github.event.comment.body == '/deploy' || startsWith(github.event.comment.body, '/deploy ')) &&
+      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: demo
+    env:
+      AWS_ROLE_TO_ASSUME: ${{ vars.AWS_ROLE_TO_ASSUME || secrets.AWS_ROLE_TO_ASSUME }}
+      AWS_REGION: ${{ vars.AWS_REGION || secrets.AWS_REGION }}
+      DEMO_S3_BUCKET: ${{ vars.DEMO_S3_BUCKET || secrets.DEMO_S3_BUCKET }}
+      DEMO_CLOUDFRONT_DISTRIBUTION_ID: ${{ vars.DEMO_CLOUDFRONT_DISTRIBUTION_ID || secrets.DEMO_CLOUDFRONT_DISTRIBUTION_ID }}
+      DEMO_BASE_URL: ${{ vars.DEMO_BASE_URL || secrets.DEMO_BASE_URL }}
+
+    steps:
+      - name: Resolve pull request head
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            })
+
+            const baseRepository = `${context.repo.owner}/${context.repo.repo}`
+            if (pr.head.repo.full_name !== baseRepository) {
+              core.setFailed('Demo deployments are restricted to same-repository pull requests.')
+              return
+            }
+
+            core.setOutput('sha', pr.head.sha)
+            core.setOutput('ref', pr.head.ref)
+            core.setOutput('number', pr.number)
+
+      - name: Check out exact PR commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.pr.outputs.sha }}
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Validate PR
+        run: npm run validate
+
+      - name: Build production assets
+        run: npm run build
+
+      - name: Verify demo deployment configuration
+        id: config
+        shell: bash
+        run: |
+          missing=0
+          for name in AWS_ROLE_TO_ASSUME AWS_REGION DEMO_S3_BUCKET DEMO_BASE_URL; do
+            if [[ -z "${!name:-}" ]]; then
+              echo "::error::$name is not configured"
+              missing=1
+            fi
+          done
+
+          if [[ "$DEMO_S3_BUCKET" != *demo* ]]; then
+            echo '::error::DEMO_S3_BUCKET must contain the word demo'
+            missing=1
+          fi
+
+          if (( missing > 0 )); then
+            exit 1
+          fi
+
+          echo "base_url=$DEMO_BASE_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Authenticate to AWS with GitHub OIDC
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: codex-demo-pr-${{ steps.pr.outputs.number }}
+
+      - name: Upload static assets to the dedicated demo bucket
+        id: upload
+        run: aws s3 sync dist "s3://${DEMO_S3_BUCKET}" --delete --only-show-errors
+
+      - name: Invalidate CloudFront and wait
+        id: invalidate
+        if: env.DEMO_CLOUDFRONT_DISTRIBUTION_ID != ''
+        shell: bash
+        run: |
+          invalidation_id="$(aws cloudfront create-invalidation \
+            --distribution-id "$DEMO_CLOUDFRONT_DISTRIBUTION_ID" \
+            --paths '/*' \
+            --query 'Invalidation.Id' \
+            --output text)"
+          aws cloudfront wait invalidation-completed \
+            --distribution-id "$DEMO_CLOUDFRONT_DISTRIBUTION_ID" \
+            --id "$invalidation_id"
+
+      - name: Validate deployed application
+        id: remote
+        run: npm run test:remote -- --base-url "$DEMO_BASE_URL"
+
+      - name: Comment deployment result on PR
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          JOB_STATUS: ${{ job.status }}
+          DEPLOYED_URL: ${{ steps.config.outputs.base_url }}
+          DEPLOYED_SHA: ${{ steps.pr.outputs.sha }}
+          REMOTE_VALIDATION: ${{ steps.remote.outcome }}
+          WORKFLOW_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        with:
+          script: |
+            const status = process.env.JOB_STATUS || 'unknown'
+            const icon = status === 'success' ? '✅' : '❌'
+            const url = process.env.DEPLOYED_URL || '_not available_'
+            const sha = process.env.DEPLOYED_SHA || '_not resolved_'
+            const validation = process.env.REMOTE_VALIDATION || 'not run'
+
+            const body = [
+              `## ${icon} Demo deployment ${status}`,
+              '',
+              `- Deployed URL: ${url}`,
+              `- Commit SHA: \`${sha}\``,
+              `- Remote validation: **${validation}**`,
+              `- [Workflow logs](${process.env.WORKFLOW_URL})`,
+              '',
+              '_Target: protected `demo` GitHub environment only._',
+            ].join('\n')
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            })

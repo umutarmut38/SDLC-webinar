@@ -1,0 +1,18 @@
+# Sanitized demo template. Never add literal credentials to this file.
+
+[mcp_servers.context7]
+url = "https://mcp.context7.com/mcp"
+
+[mcp_servers.playwright]
+command = "npx"
+args = ["-y", "@playwright/mcp@latest"]
+
+[mcp_servers.aws-knowledge]
+url = "https://knowledge-mcp.global.api.aws"
+
+# Run `graphify install --project --platform codex`, generate a graph intentionally,
+# then enable this entry only after graphify-out/graph.json exists.
+[mcp_servers.graphify]
+command = "graphify-mcp"
+args = ["graphify-out/graph.json"]
+enabled = false

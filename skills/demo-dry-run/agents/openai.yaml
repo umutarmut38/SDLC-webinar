@@ -1,0 +1,4 @@
+interface:
+  display_name: 'Demo Dry Run'
+  short_description: 'Verify webinar demo readiness safely'
+  default_prompt: 'Use $demo-dry-run to verify this repository is ready for the webinar without deploying.'

@@ -1,0 +1,4 @@
+interface:
+  display_name: 'PR Review'
+  short_description: 'Review and resolve active PR feedback'
+  default_prompt: 'Use $pr-review to run two review rounds on the active pull request.'

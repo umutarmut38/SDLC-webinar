@@ -2,16 +2,19 @@
 
 ## Verified state on 2026-07-15
 
-Running `codex mcp list` from this workstation detects:
+The redacted project configuration check detects:
 
-| Server          | State                             | Source                     |
-| --------------- | --------------------------------- | -------------------------- |
-| `context7`      | Enabled                           | Local `.codex/config.toml` |
-| `playwright`    | Enabled                           | Local `.codex/config.toml` |
-| `aws-knowledge` | Enabled                           | Local `.codex/config.toml` |
-| `graphify`      | Disabled pending graph generation | Local `.codex/config.toml` |
+| Server                | State                             | Source                     |
+| --------------------- | --------------------------------- | -------------------------- |
+| `context7`            | Enabled                           | Local `.codex/config.toml` |
+| `openaiDeveloperDocs` | Enabled                           | Local `.codex/config.toml` |
+| `playwright`          | Enabled                           | Local `.codex/config.toml` |
+| `aws_mcp`             | Docs verified, API calls disabled | Local `.codex/config.toml` |
+| `graphify`            | Disabled pending graph generation | Local `.codex/config.toml` |
 
-The live `.codex/` is excluded from git because it may contain credentials. Never stage it. `demo-config/.codex/config.toml` is the sanitized, reviewable template; inspect and manually apply it locally. VS Code receives the first three servers from `.vscode/mcp.json`. Restart Codex CLI and reload VS Code after changing MCP configuration. Trust this repository when prompted; project-local Codex configuration is only applied to trusted projects.
+The live `.codex/` is excluded from git because it may contain credentials. Never stage it. `demo-config/.codex/config.toml` is the sanitized, reviewable template; inspect and manually apply it locally. VS Code receives the same project-scoped servers from `.vscode/mcp.json`. Restart Codex CLI and reload VS Code after changing MCP configuration. Trust this repository when prompted; project-local Codex configuration is only applied to trusted projects.
+
+Demo MCPs must not be registered in `~/.codex/config.toml`. The workstation may contain unrelated user-level MCPs, which this repository does not manage. `scripts/check-demo-environment.sh` verifies that the demo MCP names are present locally and absent globally without printing configuration values.
 
 No secret is stored in the checked-in template or VS Code config. Context7 may offer higher limits with an API key, but the demo starts with its unauthenticated remote endpoint. Add a key only through a supported secret/environment mechanism—never commit it.
 
@@ -30,13 +33,22 @@ Repository-local Codex configuration:
 url = "https://mcp.context7.com/mcp"
 ```
 
-Manual Codex fallback:
-
-```bash
-codex mcp add context7 --url https://mcp.context7.com/mcp
-```
+Do not use `codex mcp add` for the demo because it writes user-level configuration. Copy the sanitized stanza into the repository's `.codex/config.toml` instead.
 
 Source: <https://github.com/upstash/context7>
+
+## OpenAI developer docs
+
+Purpose: provide current OpenAI and Codex development documentation without adding a user-global MCP entry.
+
+Repository-local Codex configuration:
+
+```toml
+[mcp_servers.openaiDeveloperDocs]
+url = "https://developers.openai.com/mcp"
+```
+
+This server is intentionally project-scoped even though it is useful beyond this repository. Do not add it with `codex mcp add` for this demo.
 
 ## Playwright
 
@@ -50,36 +62,47 @@ command = "npx"
 args = ["-y", "@playwright/mcp@latest"]
 ```
 
-Manual Codex fallback:
-
-```bash
-codex mcp add playwright -- npx -y @playwright/mcp@latest
-```
+If the server is missing, restore this stanza from `demo-config/.codex/config.toml`; do not add it globally.
 
 Use `npm run test:e2e` for repeatable local assertions and `npm run test:remote -- --base-url <url>` for deployment validation. Use MCP interactively to navigate, inspect accessibility snapshots, and diagnose visual/browser behavior.
 
 Source: <https://github.com/microsoft/playwright-mcp>
 
-## AWS Knowledge
+## AWS MCP Server
 
-Purpose: obtain current AWS documentation, CloudFormation/CDK examples, and deployment guidance without granting a broad AWS mutation tool access.
+Purpose: use the generally available managed AWS MCP Server for current documentation and deployment guidance. The older AWS Knowledge MCP entry was removed as AWS recommends, avoiding overlapping tools.
 
 Repository-local Codex configuration:
 
 ```toml
-[mcp_servers.aws-knowledge]
-url = "https://knowledge-mcp.global.api.aws"
+[mcp_servers.aws_mcp]
+command = "uvx"
+args = [
+  "mcp-proxy-for-aws==1.6.2",
+  "https://aws-mcp.eu-central-1.api.aws/mcp",
+  "--profile", "NTT",
+  "--region", "eu-central-1",
+  "--metadata", "AWS_REGION=eu-central-1",
+  "--read-only",
+]
+startup_timeout_sec = 60
 ```
 
-Manual Codex fallback:
+The local `mcp-proxy-for-aws` bridge is configured to sign authenticated requests with the named `NTT` profile and sends them to the Frankfurt managed endpoint. `--metadata AWS_REGION=eu-central-1` sets the default Region for AWS operations. `--read-only` prevents workstation-driven mutations; deployment remains exclusively in the least-privilege GitHub Actions OIDC workflow.
+
+The configuration stores only the profile name, never credentials. If the profile uses SSO and has expired, refresh it outside Codex with `aws sso login --profile NTT`, then restart Codex. Do not remove `--read-only` for the webinar.
+
+Safe checks:
 
 ```bash
-codex mcp add aws-knowledge --url https://knowledge-mcp.global.api.aws
+aws sts get-caller-identity --profile NTT
 ```
 
-This is intentionally the remote AWS Knowledge MCP, not the AWS API MCP. Actual deployment validation remains in the least-privilege GitHub Actions OIDC workflow. If a local AWS API MCP is ever added, configure it read-only and with a dedicated demo/read-only profile; do not connect production credentials.
+On first use, `uvx` may download and cache the pinned proxy package. No repository installation is required. A fresh ephemeral Codex session successfully called `aws___search_documentation` on 2026-07-15.
 
-Sources: <https://awslabs.github.io/mcp/servers/aws-knowledge-mcp-server> and <https://github.com/awslabs/mcp>
+The proxy's `--read-only` mode intentionally removes the generic `call_aws` tool, so this workstation configuration cannot inspect or mutate CloudFront, S3, IAM, or other service resources through MCP. Validate the `NTT` credential chain separately with the read-only STS command above; deployment and remote validation remain in GitHub Actions and Playwright. If future MCP-based resource inspection is essential, first create and review a dedicated least-privilege read-only profile, then change this safeguard in a separate approved task.
+
+Sources: <https://aws.amazon.com/blogs/aws/the-aws-mcp-server-is-now-generally-available/>, <https://docs.aws.amazon.com/agent-toolkit/latest/userguide/getting-started-aws-mcp-server.html>, and <https://github.com/aws/mcp-proxy-for-aws>
 
 ## graphify
 
@@ -101,7 +124,7 @@ The sanitized template contains the server but keeps `enabled = false` because n
 2. Generate the graph with the Graphify-supported `/graphify .` workflow or an explicitly reviewed `graphify extract . --backend <backend> --no-cluster` command.
 3. Confirm `graphify-out/graph.json` exists.
 4. Change `enabled = false` to `enabled = true` in `.codex/config.toml` and restart Codex.
-5. Verify with `codex mcp list`, then ask graphify to inspect the PR/deployment workflow or change impact.
+5. Verify with `./scripts/check-demo-environment.sh`, then ask graphify to inspect the PR/deployment workflow or change impact.
 
 Useful read-only inspection after generation:
 
@@ -117,8 +140,7 @@ Sources: <https://graphify.com/docs/mcp-tools> and <https://github.com/safishams
 ## Safe verification
 
 ```bash
-codex mcp list
 ./scripts/check-demo-environment.sh
 ```
 
-For each enabled server, make one harmless read/inspection call in a fresh Codex session. The environment script detects configuration but cannot prove remote tool calls succeed.
+For each enabled server, make one harmless read/inspection call in a fresh Codex session. The environment script detects configuration and scope but cannot prove remote tool calls succeed. Avoid printing raw MCP configuration or `codex mcp list` output when any local server uses secret command arguments.

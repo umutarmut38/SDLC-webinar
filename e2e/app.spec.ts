@@ -20,4 +20,19 @@ test.describe('Cloud Deployment Visualizer', () => {
     await expect(page.getByRole('button', { name: 'Plan' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Deploy' })).toBeVisible()
   })
+
+  test('runs the end-to-end delivery probe', async ({ page }) => {
+    await page.goto('/')
+
+    await expect(page.getByTestId('delivery-probe-status')).toHaveText(
+      'Delivery probe ready.',
+    )
+    await page.getByRole('button', { name: 'Run delivery probe' }).click()
+    await expect(page.getByTestId('delivery-probe-status')).toHaveText(
+      'Delivery probe passed. This build is ready for remote verification.',
+    )
+    await expect(
+      page.getByRole('button', { name: 'Probe passed' }),
+    ).toBeDisabled()
+  })
 })

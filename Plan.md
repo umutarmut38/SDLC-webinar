@@ -28,10 +28,11 @@ This is a living plan. Check an item only after its evidence exists. Add dated n
 - [x] AWS MCP documentation search completed successfully.
 - [x] AWS profile `NTT` exists, targets `eu-central-1`, and passes a read-only identity check.
 - [x] Reusable `feature-build`, `pr-review`, `deploy`, and `demo-dry-run` skills exist.
-- [x] Environment-preparation draft PR is open: <https://github.com/umutarmut38/SDLC-webinar/pull/1>.
+- [x] Environment-preparation PR #1 is merged into `main`.
+- [x] Integration rehearsal branch `demo/end-to-end-test` was created from merged `main` through GitHub MCP.
 - [ ] Rotate the Context7 token that appeared in prior terminal output, then update only the ignored local configuration.
 - [ ] Reconcile remaining stale “AWS Knowledge” and raw `codex mcp list` references in supporting runbook/skill documentation.
-- [ ] Merge environment-preparation PR #1 to `main` after human review; never merge automatically.
+- [x] Merge environment-preparation PR #1 to `main` after explicit user authorization.
 - [ ] Verify one actual GitHub Copilot PR review or prepare the documented manual fallback.
 - [ ] Decide whether to generate graphify output or deliberately use the Mermaid fallback.
 - [ ] Complete a final `demo-dry-run` after the preparation PR is merged.
@@ -55,7 +56,7 @@ No application deployment has been executed from this plan.
 ## Phase 0 — finalize environment preparation
 
 - [ ] Review the full environment-preparation PR diff.
-- [ ] Confirm CI is green at the current head SHA.
+- [x] Confirm CI is green at the current head SHA.
 - [ ] Rotate the previously exposed Context7 token.
 - [ ] Run `./scripts/check-demo-environment.sh` and retain all warnings.
 - [ ] Run `npm run validate`.
@@ -64,8 +65,8 @@ No application deployment has been executed from this plan.
 - [ ] Update stale supporting docs and the dry-run skill to use `aws_mcp` and redacted MCP checks.
 - [ ] Confirm the AWS bucket, distribution, and role are dedicated to the demo.
 - [ ] Confirm repository variables by name only.
-- [ ] Human-review and explicitly merge PR #1.
-- [ ] Pull updated `main` and confirm the two workflows are present on the default branch.
+- [x] Explicitly merge PR #1 after user authorization.
+- [x] Pull updated `main` and confirm the two workflows are present on the default branch.
 
 Exit criterion: updated `main` passes validation and contains the preparation workflows, documentation, skills, and sanitized MCP templates.
 
@@ -272,3 +273,4 @@ The environment is ready only when:
 | 2026-07-15 | Require separate present-tense deployment authorization                                  | Enforced         |
 | 2026-07-15 | Context7 token exposed in prior terminal output must be rotated                          | Open             |
 | 2026-07-15 | graphify extraction is optional; Mermaid architecture is the fallback                    | Pending decision |
+| 2026-07-15 | Use a deterministic delivery probe to exercise local, CI, and remote validation          | In progress      |

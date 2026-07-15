@@ -113,6 +113,73 @@ h1 {
   font-size: 0.875rem;
 }
 
+.integration-probe {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-top: 1rem;
+  padding: 1.5rem;
+  border: 1px solid rgb(128 163 203 / 20%);
+  border-radius: 1rem;
+  background: rgb(6 15 32 / 82%);
+}
+
+.integration-probe h2 {
+  margin-bottom: 0.4rem;
+  font-size: 1.15rem;
+}
+
+.probe-label {
+  margin-bottom: 0.35rem;
+  color: #73d6ff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.probe-copy {
+  margin-bottom: 0;
+  color: #8da0bd;
+}
+
+.probe-action {
+  min-width: min(100%, 18rem);
+}
+
+.probe-action button {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 1px solid #73d6ff;
+  border-radius: 0.7rem;
+  color: #06101f;
+  font-weight: 800;
+  background: #73d6ff;
+  cursor: pointer;
+}
+
+.probe-action button:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+.probe-action button:disabled {
+  border-color: #67e8a5;
+  background: #67e8a5;
+  cursor: default;
+}
+
+.probe-status {
+  margin: 0.65rem 0 0;
+  color: #8da0bd;
+  font-size: 0.82rem;
+}
+
+.probe-status.is-passed {
+  color: #67e8a5;
+}
+
 @media (max-width: 40rem) {
   .app-shell {
     padding: 2.5rem 0;
@@ -120,5 +187,11 @@ h1 {
 
   .stage-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .integration-probe {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 1.25rem;
   }
 }

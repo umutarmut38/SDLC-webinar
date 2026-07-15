@@ -33,7 +33,7 @@ This is a living plan. Check an item only after its evidence exists. Add dated n
 - [ ] Rotate the Context7 token that appeared in prior terminal output, then update only the ignored local configuration.
 - [ ] Reconcile remaining stale “AWS Knowledge” and raw `codex mcp list` references in supporting runbook/skill documentation.
 - [x] Merge environment-preparation PR #1 to `main` after explicit user authorization.
-- [ ] Verify one actual GitHub Copilot PR review or prepare the documented manual fallback.
+- [x] Verify an actual GitHub Copilot PR review through GitHub MCP on integration rehearsal PR #2.
 - [ ] Decide whether to generate graphify output or deliberately use the Mermaid fallback.
 - [ ] Complete a final `demo-dry-run` after the preparation PR is merged.
 
@@ -263,14 +263,15 @@ The environment is ready only when:
 
 ## Decision and progress log
 
-| Date       | Decision/evidence                                                                        | Status           |
-| ---------- | ---------------------------------------------------------------------------------------- | ---------------- |
-| 2026-07-15 | Keep the checked-in application as a placeholder until the live feature-build phase      | Accepted         |
-| 2026-07-15 | Keep all demo MCPs project-local; preserve only unrelated user-global MCPs               | Implemented      |
-| 2026-07-15 | Use managed AWS MCP through `NTT`, Frankfurt, and `--read-only`                          | Implemented      |
-| 2026-07-15 | AWS MCP documentation handshake succeeded; generic AWS API calls remain disabled locally | Verified         |
-| 2026-07-15 | Deploy only through the protected `demo` GitHub environment and `/deploy`                | Enforced         |
-| 2026-07-15 | Require separate present-tense deployment authorization                                  | Enforced         |
-| 2026-07-15 | Context7 token exposed in prior terminal output must be rotated                          | Open             |
-| 2026-07-15 | graphify extraction is optional; Mermaid architecture is the fallback                    | Pending decision |
-| 2026-07-15 | Use a deterministic delivery probe to exercise local, CI, and remote validation          | In progress      |
+| Date       | Decision/evidence                                                                        | Status             |
+| ---------- | ---------------------------------------------------------------------------------------- | ------------------ |
+| 2026-07-15 | Keep the checked-in application as a placeholder until the live feature-build phase      | Accepted           |
+| 2026-07-15 | Keep all demo MCPs project-local; preserve only unrelated user-global MCPs               | Implemented        |
+| 2026-07-15 | Use managed AWS MCP through `NTT`, Frankfurt, and `--read-only`                          | Implemented        |
+| 2026-07-15 | AWS MCP documentation handshake succeeded; generic AWS API calls remain disabled locally | Verified           |
+| 2026-07-15 | Deploy only through the protected `demo` GitHub environment and `/deploy`                | Enforced           |
+| 2026-07-15 | Require separate present-tense deployment authorization                                  | Enforced           |
+| 2026-07-15 | Context7 token exposed in prior terminal output must be rotated                          | Open               |
+| 2026-07-15 | graphify extraction is optional; Mermaid architecture is the fallback                    | Pending decision   |
+| 2026-07-15 | Use a deterministic delivery probe to exercise local, CI, and remote validation          | Deployment pending |
+| 2026-07-15 | GitHub MCP requested Copilot review on PR #2; round one completed with no comments       | Verified           |

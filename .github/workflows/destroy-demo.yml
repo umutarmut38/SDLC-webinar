@@ -100,7 +100,7 @@ jobs:
           set -euo pipefail
           aws s3 rm "s3://$DEMO_S3_BUCKET" --recursive --only-show-errors
 
-      - name: Verify no current objects remain
+      - name: Verify no current keys remain
         shell: bash
         run: |
           set -euo pipefail
@@ -110,7 +110,7 @@ jobs:
             --output text)"
 
           [[ "$object_count" == '0' ]] || {
-            echo '::error::Current objects remain in the configured demo bucket.'
+            echo '::error::Current keys remain in the configured demo bucket.'
             exit 1
           }
 
@@ -154,6 +154,6 @@ jobs:
             echo
             echo "- Workflow result: **${{ job.status }}**"
             echo '- Target: protected `demo` environment'
-            echo '- Deleted: all current objects in the dedicated demo bucket'
+            echo '- Deleted: all currently visible keys in the dedicated demo bucket'
             echo '- Retained: S3 bucket, CloudFront distribution, IAM roles, OIDC provider, GitHub environments, and variables'
           } >> "$GITHUB_STEP_SUMMARY"

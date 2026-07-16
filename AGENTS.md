@@ -144,7 +144,7 @@ After authorization:
 
 Never merge as part of deployment. Never bypass OIDC, GitHub environment controls, trusted-comment checks, or the workflow by deploying locally.
 
-## Destruction authorization gate
+## Deployed-asset cleanup authorization gate
 
 Deleting deployed demo assets requires separate, explicit, present-tense authorization. Deployment approval does not authorize cleanup.
 
@@ -154,7 +154,7 @@ After authorization:
 2. Confirm the protected `demo` environment and `AWS_ROLE_TO_ASSUME` are configured.
 3. Confirm the re-entered bucket and distribution identifiers exactly match the configured demo resources.
 4. Trigger the workflow with confirmation phrase `destroy-demo-assets` and watch it to completion.
-5. Verify the bucket remains but has no current objects, CloudFront remains, and the demo URL no longer serves the application.
+5. Verify the bucket remains but has no current keys, CloudFront remains, and the demo URL no longer serves the application.
 6. Confirm the IAM roles, OIDC provider, GitHub environments, and variables were retained.
 
 Never delete the S3 bucket, CloudFront distribution, Origin Access Control, IAM roles, OIDC provider, GitHub environments, or variables as part of application cleanup. Never destroy from the workstation or use wildcard resource policies.

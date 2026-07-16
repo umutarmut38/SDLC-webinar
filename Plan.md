@@ -240,9 +240,9 @@ Exit criterion: workflow success and independent remote Playwright success for t
 
 - [ ] Decide explicitly whether to merge, retain, or close the feature PR.
 - [ ] Record the final deployed SHA and URL if deployment occurred.
-- [ ] Obtain separate present-tense destruction authorization.
+- [ ] Obtain separate present-tense deployed-asset cleanup authorization.
 - [ ] Use the default-branch `destroy-demo.yml` workflow through the protected `demo` environment.
-- [ ] Verify the bucket has no current objects and the deployed app is no longer served.
+- [ ] Verify the bucket has no current keys and the deployed app is no longer served.
 - [ ] Confirm the bucket, distribution, OAC, IAM, OIDC, environments, and variables were retained.
 - [ ] Remove generated reports, build output, and graphify output as appropriate.
 - [ ] Confirm no credentials or `.env` files entered git history.

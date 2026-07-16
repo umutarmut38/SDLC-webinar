@@ -22,13 +22,12 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: read
+  contents: none
   id-token: write
 
 jobs:
   destroy:
     name: Destroy dedicated demo resources
-    if: inputs.confirmation == 'destroy-demo'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: demo-destroy
@@ -40,6 +39,7 @@ jobs:
 
     steps:
       - name: Verify explicit destroy scope
+        id: scope
         shell: bash
         env:
           CONFIRMATION: ${{ inputs.confirmation }}
@@ -50,6 +50,11 @@ jobs:
 
           [[ "$CONFIRMATION" == 'destroy-demo' ]] || {
             echo '::error::The confirmation phrase must be exactly destroy-demo.'
+            exit 1
+          }
+
+          [[ "$GITHUB_REF" == 'refs/heads/main' ]] || {
+            echo '::error::Demo destruction can run only from the main branch.'
             exit 1
           }
 
@@ -74,6 +79,13 @@ jobs:
             exit 1
           }
 
+          if [[ "$configured_distribution" == 'none' ]]; then
+            echo 'DEMO_CLOUDFRONT_DISTRIBUTION_ID=' >> "$GITHUB_ENV"
+            echo 'has_distribution=false' >> "$GITHUB_OUTPUT"
+          else
+            echo 'has_distribution=true' >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Authenticate to AWS with GitHub OIDC
         uses: aws-actions/configure-aws-credentials@v5
         with:
@@ -82,7 +94,7 @@ jobs:
           role-session-name: codex-demo-destroy
 
       - name: Verify CloudFront belongs to the demo bucket
-        if: env.DEMO_CLOUDFRONT_DISTRIBUTION_ID != ''
+        if: steps.scope.outputs.has_distribution == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -92,14 +104,27 @@ jobs:
             --query 'DistributionConfig.Origins.Items[].DomainName' \
             --output text)"
 
-          [[ "$origins" == *"$DEMO_S3_BUCKET"* ]] || {
+          origin_matches=false
+          for origin in $origins; do
+            case "$origin" in
+              "$DEMO_S3_BUCKET.s3.amazonaws.com" | \
+                "$DEMO_S3_BUCKET.s3.$AWS_REGION.amazonaws.com" | \
+                "$DEMO_S3_BUCKET.s3-$AWS_REGION.amazonaws.com" | \
+                "$DEMO_S3_BUCKET.s3-website.$AWS_REGION.amazonaws.com" | \
+                "$DEMO_S3_BUCKET.s3-website-$AWS_REGION.amazonaws.com")
+                origin_matches=true
+                ;;
+            esac
+          done
+
+          [[ "$origin_matches" == 'true' ]] || {
             echo '::error::The configured distribution does not use the configured demo bucket.'
             exit 1
           }
 
       - name: Disable and delete CloudFront distribution
         id: cloudfront
-        if: env.DEMO_CLOUDFRONT_DISTRIBUTION_ID != ''
+        if: steps.scope.outputs.has_distribution == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -125,9 +150,10 @@ jobs:
               --id "$DEMO_CLOUDFRONT_DISTRIBUTION_ID" \
               --if-match "$etag" \
               --distribution-config "file://$disabled_file" >/dev/null
-            aws cloudfront wait distribution-deployed \
-              --id "$DEMO_CLOUDFRONT_DISTRIBUTION_ID"
           fi
+
+          aws cloudfront wait distribution-deployed \
+            --id "$DEMO_CLOUDFRONT_DISTRIBUTION_ID"
 
           delete_etag="$(aws cloudfront get-distribution-config \
             --id "$DEMO_CLOUDFRONT_DISTRIBUTION_ID" \
@@ -170,7 +196,7 @@ jobs:
             exit 1
           fi
 
-          if [[ -n "${DEMO_CLOUDFRONT_DISTRIBUTION_ID:-}" ]] && \
+          if [[ "${{ steps.scope.outputs.has_distribution }}" == 'true' ]] && \
             aws cloudfront get-distribution \
               --id "$DEMO_CLOUDFRONT_DISTRIBUTION_ID" >/dev/null 2>&1; then
             echo '::error::The configured demo distribution still exists.'

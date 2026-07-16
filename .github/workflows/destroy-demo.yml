@@ -98,7 +98,31 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          aws s3 rm "s3://$DEMO_S3_BUCKET" --recursive --only-show-errors
+
+          for _ in {1..100}; do
+            listing="$(aws s3api list-objects-v2 \
+              --bucket "$DEMO_S3_BUCKET" \
+              --max-keys 1000 \
+              --output json)"
+            delete_payload="$(jq -c '{Objects: ((.Contents // []) | map({Key})), Quiet: true}' <<< "$listing")"
+            key_count="$(jq '.Objects | length' <<< "$delete_payload")"
+
+            if [[ "$key_count" -eq 0 ]]; then
+              break
+            fi
+
+            result="$(aws s3api delete-objects \
+              --bucket "$DEMO_S3_BUCKET" \
+              --delete "$delete_payload" \
+              --output json)"
+            error_count="$(jq '(.Errors // []) | length' <<< "$result")"
+
+            [[ "$error_count" -eq 0 ]] || {
+              echo '::error::S3 reported one or more key-deletion errors.'
+              exit 1
+            }
+
+          done
 
       - name: Verify no current keys remain
         shell: bash

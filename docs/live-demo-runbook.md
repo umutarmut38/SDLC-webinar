@@ -32,6 +32,7 @@ codex mcp list
 gh pr view --json number,url,headRefName,state
 gh workflow view ci.yml
 gh workflow view deploy-on-comment.yml
+gh workflow view destroy-demo.yml
 ```
 
 Inspect only repository variable names, never values:
@@ -114,8 +115,9 @@ If deployment cannot be repaired within the session:
 ## Cleanup after the webinar
 
 1. Close or retain the feature PR according to the teaching plan; do not merge automatically.
-2. Remove repository variables and disable/delete the `demo` GitHub environment when no longer needed.
-3. Follow the reviewed, resource-specific cleanup sequence in `docs/aws-demo-setup.md`.
-4. Remove generated `graphify-out/`, Playwright reports, and local build artifacts.
-5. Remove any temporary global MCP entries only if they were created solely for this webinar. Keep the checked-in local config for reproducibility.
-6. Verify no credentials or `.env` files were added to git history.
+2. Obtain separate present-tense authorization for destructive cleanup.
+3. Run the default-branch **Destroy demo AWS resources** workflow through the protected `demo-destroy` environment, entering `destroy-demo` and the exact resource identifiers.
+4. Verify the dedicated distribution and bucket are absent; then follow `docs/aws-demo-setup.md` for retained OAC, IAM, OIDC, and GitHub configuration cleanup.
+5. Remove generated `graphify-out/`, Playwright reports, and local build artifacts.
+6. Remove any temporary global MCP entries only if they were created solely for this webinar. Keep the checked-in local config for reproducibility.
+7. Verify no credentials or `.env` files were added to git history.

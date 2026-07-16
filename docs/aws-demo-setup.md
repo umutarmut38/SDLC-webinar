@@ -97,83 +97,18 @@ OIDC itself can only be validated in GitHub Actions. A safe preflight is to temp
 
 ## Cleanup after the webinar
 
-The default-branch `destroy-demo.yml` workflow is the approved mechanism for deleting the dedicated S3 bucket and CloudFront distribution. It uses a separate `demo-destroy` GitHub environment and a separate OIDC role so the ordinary deployment role never receives infrastructure-deletion permission.
+The default-branch `destroy-demo.yml` workflow removes all currently visible keys from the bucket dedicated exclusively to `/deploy` output. It uses the same protected `demo` environment, OIDC role, and resource-scoped permissions as deployment. Do not place unrelated objects in this bucket. Historical versions are outside this application-cleanup scope if bucket versioning is enabled.
 
-Create `GitHubActions-SDLC-Webinar-Destroy` with the same GitHub OIDC provider, but trust only the protected `demo-destroy` environment. When GitHub emits ID-qualified subjects for the account, use the exact owner and repository form observed in CloudTrail:
+The cleanup workflow:
 
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "Federated": "arn:aws:iam::<ACCOUNT_ID>:oidc-provider/token.actions.githubusercontent.com"
-      },
-      "Action": "sts:AssumeRoleWithWebIdentity",
-      "Condition": {
-        "StringEquals": {
-          "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
-          "token.actions.githubusercontent.com:sub": "repo:OWNER/REPOSITORY:environment:demo-destroy"
-        }
-      }
-    }
-  ]
-}
-```
+1. requires the exact confirmation phrase `destroy-demo-assets`;
+2. runs only from `main`;
+3. requires the operator to re-enter the configured bucket and distribution identifiers;
+4. deletes currently visible keys from the dedicated demo bucket;
+5. confirms the bucket contains no current keys;
+6. invalidates CloudFront and waits for completion; and
+7. confirms the configured demo URL no longer returns a successful response.
 
-Give that destroy role only these resource-scoped permissions. Keep the account ID, bucket, and distribution placeholders exact; do not use wildcards for the bucket or distribution.
+Open **Actions → Destroy deployed demo assets → Run workflow** on the default branch. Enter `destroy-demo-assets`, the exact bucket name, and the exact distribution ID (or `none`).
 
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "EmptyAndDeleteOnlyDemoBucket",
-      "Effect": "Allow",
-      "Action": [
-        "s3:DeleteBucket",
-        "s3:DeleteObject",
-        "s3:DeleteObjectVersion",
-        "s3:GetBucketLocation",
-        "s3:ListBucket",
-        "s3:ListBucketVersions"
-      ],
-      "Resource": [
-        "arn:aws:s3:::YOUR-DEMO-BUCKET",
-        "arn:aws:s3:::YOUR-DEMO-BUCKET/*"
-      ]
-    },
-    {
-      "Sid": "DisableAndDeleteOnlyDemoDistribution",
-      "Effect": "Allow",
-      "Action": [
-        "cloudfront:DeleteDistribution",
-        "cloudfront:GetDistribution",
-        "cloudfront:GetDistributionConfig",
-        "cloudfront:UpdateDistribution"
-      ],
-      "Resource": "arn:aws:cloudfront::<ACCOUNT_ID>:distribution/YOUR_DEMO_DISTRIBUTION_ID"
-    }
-  ]
-}
-```
-
-Create the protected GitHub environment `demo-destroy`, add a required reviewer, and configure these environment variables:
-
-- `AWS_DESTROY_ROLE_TO_ASSUME`
-- `AWS_REGION`
-- `DEMO_S3_BUCKET`
-- `DEMO_CLOUDFRONT_DISTRIBUTION_ID`, optional
-
-To destroy the configured resources, open **Actions → Destroy demo AWS resources → Run workflow** on the default branch. Enter `destroy-demo`, re-enter the exact bucket name, and re-enter the exact distribution ID (or `none`). The workflow checks that the distribution origin is the configured bucket before deleting anything.
-
-After the workflow succeeds, finish the non-automated cleanup deliberately:
-
-1. Verify the dedicated distribution and bucket are absent.
-2. Delete any now-unused Origin Access Control reported by the workflow only after confirming no distribution references it.
-3. Delete only the dedicated destroy role and its policies. Retain the deployment role if the demo will be reused; otherwise delete it separately.
-4. Remove stale resource values from the `demo` and `demo-destroy` GitHub environments.
-5. Remove the account OIDC provider only if it was created solely for this repository and no other repository trusts it.
-
-The workflow intentionally cannot delete the role whose credentials it is using, the account-level OIDC provider, GitHub environments, or GitHub variables. Never grant infrastructure-deletion actions to the ordinary deployment role and never use wildcard cleanup scripts.
+This cleanup deliberately retains the S3 bucket, CloudFront distribution, Origin Access Control, deployment role and policy, GitHub OIDC provider, GitHub environments, and repository variables so the isolated demo environment can be reused. It never deletes infrastructure and requires no additional AWS role or permissions beyond the documented deployment policy.

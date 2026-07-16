@@ -1,11 +1,11 @@
-name: Destroy demo AWS resources
-run-name: Destroy protected demo resources
+name: Destroy deployed demo assets
+run-name: Purge deployed assets from the protected demo
 
 on:
   workflow_dispatch:
     inputs:
       confirmation:
-        description: Type destroy-demo to authorize irreversible deletion
+        description: Type destroy-demo-assets to authorize artifact deletion
         required: true
         type: string
       expected_bucket:
@@ -18,7 +18,7 @@ on:
         type: string
 
 concurrency:
-  group: destroy-demo-environment
+  group: destroy-deployed-demo-assets
   cancel-in-progress: false
 
 permissions:
@@ -27,18 +27,19 @@ permissions:
 
 jobs:
   destroy:
-    name: Destroy dedicated demo resources
+    name: Purge deployed application assets
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    environment: demo-destroy
+    environment: demo
     env:
-      AWS_DESTROY_ROLE_TO_ASSUME: ${{ vars.AWS_DESTROY_ROLE_TO_ASSUME || secrets.AWS_DESTROY_ROLE_TO_ASSUME }}
+      AWS_ROLE_TO_ASSUME: ${{ vars.AWS_ROLE_TO_ASSUME || secrets.AWS_ROLE_TO_ASSUME }}
       AWS_REGION: ${{ vars.AWS_REGION || secrets.AWS_REGION }}
       DEMO_S3_BUCKET: ${{ vars.DEMO_S3_BUCKET || secrets.DEMO_S3_BUCKET }}
       DEMO_CLOUDFRONT_DISTRIBUTION_ID: ${{ vars.DEMO_CLOUDFRONT_DISTRIBUTION_ID || secrets.DEMO_CLOUDFRONT_DISTRIBUTION_ID }}
+      DEMO_BASE_URL: ${{ vars.DEMO_BASE_URL || secrets.DEMO_BASE_URL }}
 
     steps:
-      - name: Verify explicit destroy scope
+      - name: Verify explicit cleanup scope
         id: scope
         shell: bash
         env:
@@ -48,18 +49,18 @@ jobs:
         run: |
           set -euo pipefail
 
-          [[ "$CONFIRMATION" == 'destroy-demo' ]] || {
-            echo '::error::The confirmation phrase must be exactly destroy-demo.'
+          [[ "$CONFIRMATION" == 'destroy-demo-assets' ]] || {
+            echo '::error::The confirmation phrase must be exactly destroy-demo-assets.'
             exit 1
           }
 
           [[ "$GITHUB_REF" == 'refs/heads/main' ]] || {
-            echo '::error::Demo destruction can run only from the main branch.'
+            echo '::error::Demo cleanup can run only from the main branch.'
             exit 1
           }
 
-          [[ -n "$AWS_DESTROY_ROLE_TO_ASSUME" && -n "$AWS_REGION" && -n "$DEMO_S3_BUCKET" ]] || {
-            echo '::error::AWS_DESTROY_ROLE_TO_ASSUME, AWS_REGION, and DEMO_S3_BUCKET must be configured.'
+          [[ -n "$AWS_ROLE_TO_ASSUME" && -n "$AWS_REGION" && -n "$DEMO_S3_BUCKET" && -n "$DEMO_BASE_URL" ]] || {
+            echo '::error::AWS_ROLE_TO_ASSUME, AWS_REGION, DEMO_S3_BUCKET, and DEMO_BASE_URL must be configured.'
             exit 1
           }
 
@@ -89,130 +90,70 @@ jobs:
       - name: Authenticate to AWS with GitHub OIDC
         uses: aws-actions/configure-aws-credentials@v5
         with:
-          role-to-assume: ${{ env.AWS_DESTROY_ROLE_TO_ASSUME }}
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ env.AWS_REGION }}
-          role-session-name: codex-demo-destroy
+          role-session-name: codex-demo-assets-cleanup
 
-      - name: Verify CloudFront belongs to the demo bucket
-        if: steps.scope.outputs.has_distribution == 'true'
+      - name: Delete deployed application assets
         shell: bash
         run: |
           set -euo pipefail
+          aws s3 rm "s3://$DEMO_S3_BUCKET" --recursive --only-show-errors
 
-          origins="$(aws cloudfront get-distribution-config \
-            --id "$DEMO_CLOUDFRONT_DISTRIBUTION_ID" \
-            --query 'DistributionConfig.Origins.Items[].DomainName' \
+      - name: Verify no current keys remain
+        shell: bash
+        run: |
+          set -euo pipefail
+          object_count="$(aws s3api list-objects-v2 \
+            --bucket "$DEMO_S3_BUCKET" \
+            --query 'KeyCount' \
             --output text)"
 
-          origin_matches=false
-          for origin in $origins; do
-            case "$origin" in
-              "$DEMO_S3_BUCKET.s3.amazonaws.com" | \
-                "$DEMO_S3_BUCKET.s3.$AWS_REGION.amazonaws.com" | \
-                "$DEMO_S3_BUCKET.s3-$AWS_REGION.amazonaws.com" | \
-                "$DEMO_S3_BUCKET.s3-website.$AWS_REGION.amazonaws.com" | \
-                "$DEMO_S3_BUCKET.s3-website-$AWS_REGION.amazonaws.com")
-                origin_matches=true
-                ;;
-            esac
-          done
-
-          [[ "$origin_matches" == 'true' ]] || {
-            echo '::error::The configured distribution does not use the configured demo bucket.'
+          [[ "$object_count" == '0' ]] || {
+            echo '::error::Current keys remain in the configured demo bucket.'
             exit 1
           }
 
-      - name: Disable and delete CloudFront distribution
-        id: cloudfront
+      - name: Invalidate CloudFront and wait
         if: steps.scope.outputs.has_distribution == 'true'
         shell: bash
         run: |
           set -euo pipefail
-
-          config_file="$(mktemp)"
-          disabled_file="$(mktemp)"
-          aws cloudfront get-distribution-config \
-            --id "$DEMO_CLOUDFRONT_DISTRIBUTION_ID" \
-            --query 'DistributionConfig' \
-            --output json > "$config_file"
-
-          oac_ids="$(jq -r '.Origins.Items[]?.OriginAccessControlId // empty' "$config_file" | sort -u | paste -sd, -)"
-          echo "origin_access_control_ids=${oac_ids:-none}" >> "$GITHUB_OUTPUT"
-
-          enabled="$(jq -r '.Enabled' "$config_file")"
-          if [[ "$enabled" == 'true' ]]; then
-            etag="$(aws cloudfront get-distribution-config \
-              --id "$DEMO_CLOUDFRONT_DISTRIBUTION_ID" \
-              --query 'ETag' \
-              --output text)"
-            jq '.Enabled = false' "$config_file" > "$disabled_file"
-            aws cloudfront update-distribution \
-              --id "$DEMO_CLOUDFRONT_DISTRIBUTION_ID" \
-              --if-match "$etag" \
-              --distribution-config "file://$disabled_file" >/dev/null
-          fi
-
-          aws cloudfront wait distribution-deployed \
-            --id "$DEMO_CLOUDFRONT_DISTRIBUTION_ID"
-
-          delete_etag="$(aws cloudfront get-distribution-config \
-            --id "$DEMO_CLOUDFRONT_DISTRIBUTION_ID" \
-            --query 'ETag' \
+          invalidation_id="$(aws cloudfront create-invalidation \
+            --distribution-id "$DEMO_CLOUDFRONT_DISTRIBUTION_ID" \
+            --paths '/*' \
+            --query 'Invalidation.Id' \
             --output text)"
-          aws cloudfront delete-distribution \
-            --id "$DEMO_CLOUDFRONT_DISTRIBUTION_ID" \
-            --if-match "$delete_etag"
+          aws cloudfront wait invalidation-completed \
+            --distribution-id "$DEMO_CLOUDFRONT_DISTRIBUTION_ID" \
+            --id "$invalidation_id"
 
-      - name: Empty and delete demo bucket
+      - name: Verify deployed app is no longer served
         shell: bash
         run: |
           set -euo pipefail
+          status="$(curl --silent --show-error --location \
+            --output /dev/null \
+            --write-out '%{http_code}' \
+            --max-time 30 \
+            "$DEMO_BASE_URL")"
 
-          aws s3 rm "s3://$DEMO_S3_BUCKET" --recursive --only-show-errors
-
-          while true; do
-            versions="$(aws s3api list-object-versions \
-              --bucket "$DEMO_S3_BUCKET" \
-              --output json)"
-            delete_payload="$(jq -c '{Objects: (((.Versions // []) + (.DeleteMarkers // [])) | map({Key, VersionId})), Quiet: true}' <<< "$versions")"
-            object_count="$(jq '.Objects | length' <<< "$delete_payload")"
-            [[ "$object_count" -eq 0 ]] && break
-            aws s3api delete-objects \
-              --bucket "$DEMO_S3_BUCKET" \
-              --delete "$delete_payload" >/dev/null
-          done
-
-          aws s3api delete-bucket \
-            --bucket "$DEMO_S3_BUCKET" \
-            --region "$AWS_REGION"
-
-      - name: Verify configured resources are absent
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          if aws s3api head-bucket --bucket "$DEMO_S3_BUCKET" 2>/dev/null; then
-            echo '::error::The configured demo bucket still exists.'
+          if [[ "$status" =~ ^2 ]]; then
+            echo "::error::The demo URL still returns HTTP $status after asset cleanup."
             exit 1
           fi
 
-          if [[ "${{ steps.scope.outputs.has_distribution }}" == 'true' ]] && \
-            aws cloudfront get-distribution \
-              --id "$DEMO_CLOUDFRONT_DISTRIBUTION_ID" >/dev/null 2>&1; then
-            echo '::error::The configured demo distribution still exists.'
-            exit 1
-          fi
+          echo "The demo URL now returns HTTP $status."
 
       - name: Write cleanup summary
         if: always()
         shell: bash
         run: |
           {
-            echo '## Demo cleanup'
+            echo '## Deployed demo asset cleanup'
             echo
             echo "- Workflow result: **${{ job.status }}**"
-            echo '- Target: protected `demo-destroy` environment'
-            echo '- CloudFront distribution and S3 bucket were the only deletion targets.'
-            echo '- Retained Origin Access Control IDs: `${{ steps.cloudfront.outputs.origin_access_control_ids || 'none' }}`'
-            echo '- The IAM role, GitHub OIDC provider, GitHub variables, and any Origin Access Control remain for explicit follow-up cleanup.'
+            echo '- Target: protected `demo` environment'
+            echo '- Deleted: all currently visible keys in the dedicated demo bucket'
+            echo '- Retained: S3 bucket, CloudFront distribution, IAM roles, OIDC provider, GitHub environments, and variables'
           } >> "$GITHUB_STEP_SUMMARY"

@@ -115,9 +115,9 @@ If deployment cannot be repaired within the session:
 ## Cleanup after the webinar
 
 1. Close or retain the feature PR according to the teaching plan; do not merge automatically.
-2. Obtain separate present-tense authorization for destructive cleanup.
-3. Run the default-branch **Destroy demo AWS resources** workflow through the protected `demo-destroy` environment, entering `destroy-demo` and the exact resource identifiers.
-4. Verify the dedicated distribution and bucket are absent; then follow `docs/aws-demo-setup.md` for retained OAC, IAM, OIDC, and GitHub configuration cleanup.
+2. Obtain separate present-tense authorization for deployed-asset cleanup.
+3. Run the default-branch **Destroy deployed demo assets** workflow through the protected `demo` environment, entering `destroy-demo-assets` and the exact resource identifiers.
+4. Verify the bucket has no current keys and the demo URL no longer serves the app; retain the bucket, distribution, OAC, IAM, OIDC, environments, and variables for reuse.
 5. Remove generated `graphify-out/`, Playwright reports, and local build artifacts.
 6. Remove any temporary global MCP entries only if they were created solely for this webinar. Keep the checked-in local config for reproducibility.
 7. Verify no credentials or `.env` files were added to git history.

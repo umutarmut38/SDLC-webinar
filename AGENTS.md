@@ -146,18 +146,18 @@ Never merge as part of deployment. Never bypass OIDC, GitHub environment control
 
 ## Destruction authorization gate
 
-Deleting demo infrastructure requires separate, explicit, present-tense authorization. Deployment approval does not authorize cleanup.
+Deleting deployed demo assets requires separate, explicit, present-tense authorization. Deployment approval does not authorize cleanup.
 
 After authorization:
 
 1. Confirm `destroy-demo.yml` exists on the default branch.
-2. Confirm the dedicated `demo-destroy` environment and `AWS_DESTROY_ROLE_TO_ASSUME` are configured.
+2. Confirm the protected `demo` environment and `AWS_ROLE_TO_ASSUME` are configured.
 3. Confirm the re-entered bucket and distribution identifiers exactly match the configured demo resources.
-4. Trigger the workflow with confirmation phrase `destroy-demo` and watch it to completion.
-5. Verify the dedicated CloudFront distribution and S3 bucket are absent.
-6. Report retained Origin Access Controls, IAM roles, OIDC providers, and GitHub configuration as explicit follow-up items.
+4. Trigger the workflow with confirmation phrase `destroy-demo-assets` and watch it to completion.
+5. Verify the bucket remains but has no current objects, CloudFront remains, and the demo URL no longer serves the application.
+6. Confirm the IAM roles, OIDC provider, GitHub environments, and variables were retained.
 
-Never grant delete-infrastructure permissions to the ordinary deployment role, destroy from the workstation, use wildcard resource policies, or delete an account-level OIDC provider without proving that nothing else uses it.
+Never delete the S3 bucket, CloudFront distribution, Origin Access Control, IAM roles, OIDC provider, GitHub environments, or variables as part of application cleanup. Never destroy from the workstation or use wildcard resource policies.
 
 ## Stop conditions
 

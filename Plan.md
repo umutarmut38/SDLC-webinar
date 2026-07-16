@@ -23,7 +23,7 @@ This is a living plan. Check an item only after its evidence exists. Add dated n
 - [x] `npm run validate` covers formatting, linting, unit tests, E2E tests, type checking, and build.
 - [x] Pull-request CI exists and passes on the environment-preparation branch.
 - [x] Trusted `/deploy` comment workflow exists.
-- [ ] Protected, separately authorized demo-destroy workflow exists on `main`.
+- [ ] Protected, separately authorized deployed-asset cleanup workflow exists on `main`.
 - [x] Dedicated demo S3, CloudFront, GitHub OIDC role, repository variables, and `demo` environment are configured.
 - [x] Context7, Playwright, OpenAI developer docs, AWS MCP, and graphify configurations are project-local.
 - [x] AWS MCP documentation search completed successfully.
@@ -241,10 +241,9 @@ Exit criterion: workflow success and independent remote Playwright success for t
 - [ ] Decide explicitly whether to merge, retain, or close the feature PR.
 - [ ] Record the final deployed SHA and URL if deployment occurred.
 - [ ] Obtain separate present-tense destruction authorization.
-- [ ] Use the default-branch `destroy-demo.yml` workflow through the protected `demo-destroy` environment.
-- [ ] Verify the dedicated CloudFront distribution and S3 bucket are absent.
-- [ ] Follow `docs/aws-demo-setup.md` for retained OAC, IAM, OIDC, and GitHub configuration cleanup.
-- [ ] Remove or disable GitHub variables and the `demo` environment when no longer needed.
+- [ ] Use the default-branch `destroy-demo.yml` workflow through the protected `demo` environment.
+- [ ] Verify the bucket has no current objects and the deployed app is no longer served.
+- [ ] Confirm the bucket, distribution, OAC, IAM, OIDC, environments, and variables were retained.
 - [ ] Remove generated reports, build output, and graphify output as appropriate.
 - [ ] Confirm no credentials or `.env` files entered git history.
 - [ ] Preserve reusable sanitized skills and documentation.
@@ -276,4 +275,4 @@ The environment is ready only when:
 | 2026-07-15 | Require separate present-tense deployment authorization                                  | Enforced         |
 | 2026-07-15 | Context7 token exposed in prior terminal output must be rotated                          | Open             |
 | 2026-07-15 | graphify extraction is optional; Mermaid architecture is the fallback                    | Pending decision |
-| 2026-07-16 | Keep infrastructure deletion in a separate protected workflow and OIDC role              | In progress      |
+| 2026-07-16 | Restrict post-demo cleanup to artifacts uploaded by `/deploy`; retain infrastructure     | In progress      |

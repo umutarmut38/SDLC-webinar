@@ -29,7 +29,7 @@ jobs:
   destroy:
     name: Purge deployed application assets
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     environment: demo
     env:
       AWS_ROLE_TO_ASSUME: ${{ vars.AWS_ROLE_TO_ASSUME || secrets.AWS_ROLE_TO_ASSUME }}
@@ -154,6 +154,6 @@ jobs:
             echo
             echo "- Workflow result: **${{ job.status }}**"
             echo '- Target: protected `demo` environment'
-            echo '- Deleted: current application objects uploaded by the deployment pipeline'
+            echo '- Deleted: all current objects in the dedicated demo bucket'
             echo '- Retained: S3 bucket, CloudFront distribution, IAM roles, OIDC provider, GitHub environments, and variables'
           } >> "$GITHUB_STEP_SUMMARY"

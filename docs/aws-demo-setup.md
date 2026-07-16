@@ -97,7 +97,7 @@ OIDC itself can only be validated in GitHub Actions. A safe preflight is to temp
 
 ## Cleanup after the webinar
 
-The default-branch `destroy-demo.yml` workflow removes only the current application objects uploaded by `/deploy`. It uses the same protected `demo` environment, OIDC role, and resource-scoped permissions as deployment.
+The default-branch `destroy-demo.yml` workflow removes all current objects from the bucket dedicated exclusively to `/deploy` output. It uses the same protected `demo` environment, OIDC role, and resource-scoped permissions as deployment. Do not place unrelated objects in this bucket.
 
 The cleanup workflow:
 

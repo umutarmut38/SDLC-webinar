@@ -15,6 +15,7 @@ playwright-report/
 test-results/
 coverage/
 graphify-out/
+.playwright-mcp/
 
 # Local configuration and secrets
 .env

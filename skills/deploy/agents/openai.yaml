@@ -1,4 +1,0 @@
-interface:
-  display_name: 'Deploy'
-  short_description: 'Deploy and validate the active demo PR'
-  default_prompt: 'Use $deploy to deploy the active pull request to the demo environment and validate it.'

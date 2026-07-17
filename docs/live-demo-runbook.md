@@ -2,122 +2,63 @@
 
 ## Pre-demo checklist
 
-Complete this at least one day before the webinar:
-
-- [ ] Environment-preparation changes are merged to `main`; the `issue_comment` workflow must be on the default branch.
-- [ ] A new feature branch and active PR exist for the live build.
-- [ ] `gh` authenticates to the intended `github.com` repository.
-- [ ] The `demo` GitHub environment has required reviewers and dedicated demo variables.
-- [ ] AWS OIDC trust is restricted to this repository and `environment:demo`.
-- [ ] The S3 bucket and optional CloudFront distribution are dedicated to the demo.
-- [ ] Copilot review was successfully requested once in a rehearsal, or its manual fallback is prepared.
-- [ ] Context7, Playwright, and AWS Knowledge each complete a harmless MCP call in a fresh session.
-- [ ] graphify is either generated/enabled and tested or `docs/architecture.md` is ready as the declared fallback.
-- [ ] A known-good `DEMO_BASE_URL` is available for the manual fallback.
-- [ ] Cleanup owners and resource IDs are recorded.
+- [ ] Local `main` is clean and matches GitHub.
+- [ ] The repository contains no application, package manifest, tests, or CI workflow.
+- [ ] Node.js, npm, git, and `gh` are available.
+- [ ] `gh` and GitHub MCP authenticate as the intended account.
+- [ ] Context7 completes a harmless library lookup in a fresh Codex session.
+- [ ] Playwright MCP exposes browser tools.
+- [ ] `pr-review` and `web-qa` are installed project-locally and validate structurally.
+- [ ] Copilot review remains enabled for this repository/account.
+- [ ] Internet access is available for the intentionally cold npm installation.
+- [ ] No deployment, hosting, AWS, or production integration is configured.
 
 ## Exact preflight commands
 
 Run from the repository root:
 
 ```bash
-node --version
-npm --version
-git status --short --branch
-gh api user --hostname github.com --jq .login
-npm ci
-./scripts/check-demo-environment.sh
-npm run validate
-codex mcp list
-gh pr view --json number,url,headRefName,state
-gh workflow view ci.yml
-gh workflow view deploy-on-comment.yml
-gh workflow view destroy-demo.yml
+rtk node --version
+rtk npm --version
+rtk git status --short --branch
+rtk gh api user --hostname github.com --jq .login
+rtk gh pr list --state open
+rtk rg --files --hidden -g '!.git/**'
 ```
 
-Inspect only repository variable names, never values:
+Then make the harmless MCP calls described in `docs/mcp-setup.md`. Do not create application files during preflight.
 
-```bash
-gh variable list --json name --jq '.[].name'
-```
+## Start the live demo
 
-Do not post `/deploy` during preflight unless the presenter explicitly authorizes a real demo deployment.
+1. Open a fresh Codex session on clean `main`.
+2. Paste the instruction in `DEMO_PROMPT.md`.
+3. Let Codex inspect and update `Plan.md` before implementation.
+4. Narrate the visible Context7, browser QA, CI, and review transitions.
+5. End with an open, green, reviewed PR. Do not merge it.
 
-## Suggested live sequence and Codex prompts
+## Recovery: implementation takes too long
 
-1. **Inspect and plan**
+Reduce the application to five deterministic 3D nodes, stage selection, advance/reset, and one simulated failure. Preserve accessible controls, meaningful tests, CI, and the review loop; move visual polish into PR follow-up notes.
 
-   > Inspect the placeholder and propose a small, reviewable first slice for the 3D Cloud Deployment Visualizer. Do not edit yet. Include tests and identify the current MCP status.
+## Recovery: dependency installation fails
 
-2. **Use current documentation**
-
-   > Use Context7 to verify the installed React Three Fiber, Drei, and Three.js APIs needed for a Canvas, camera, lights, and interactive deployment nodes. Summarize the API choices before coding.
-
-3. **Build the feature**
-
-   > Use the feature-build skill to implement a clear but bounded 3D deployment pipeline: stages, connections, selection, and status controls. Keep it client-side and preserve the deployment infrastructure.
-
-4. **Browser validation**
-
-   > Start the local app, use Playwright MCP to inspect it at desktop and narrow viewport sizes, exercise every stage control, fix console errors, then run npm run validate.
-
-5. **Architecture inspection**
-
-   > If graphify is enabled, query the graph for the path from UI controls to rendered scene state and inspect change impact. Otherwise show docs/architecture.md and state that graphify extraction was intentionally deferred.
-
-6. **PR lifecycle**
-
-   > Summarize the diff, commit it on the feature branch, push it, and update the active PR. Do not merge.
-
-7. **Review**
-
-   > Use the pr-review skill for two rounds. Do not ignore security findings and do not mark threads resolved without a code change or recorded rationale.
-
-8. **Deployment**
-
-   > Use the deploy skill for this active PR. Confirm it targets only the demo environment, then post /deploy, watch the matching workflow, validate the returned URL, and do not merge.
-
-## Recovery: Codex implementation takes too long
-
-1. Stop at the last passing commit; do not expand scope.
-2. Reduce to one scene with four deployment nodes, fixed connections, and one selected-state interaction.
-3. Keep the prewritten placeholder contract (`visualization-root`, heading, and deployment-stage controls) so tests remain useful.
-4. Show the remaining feature plan in the PR description instead of implementing it live.
-5. Use a rehearsed backup branch only if its origin and commit are clearly disclosed to the audience.
+Retry the failed npm command once after checking connectivity. If the registry remains unavailable, explain the cold-install tradeoff and switch to a previously rehearsed local branch only if its origin is disclosed to the audience.
 
 ## Recovery: local tests fail
 
-1. Run the smallest failing layer: `npm test`, `npm run test:e2e`, or `npm run build`.
-2. Open `playwright-report/index.html` after an E2E failure and inspect traces/screenshots.
-3. Check whether port 4173 is occupied; Playwright normally reuses a healthy local server outside CI.
-4. Confirm Playwright MCP can open the app and that system Chrome is available for local CLI tests; do not download a browser during the live session.
-5. If the 3D/WebGL path is flaky, preserve deterministic DOM controls and mark WebGL-specific validation as a follow-up; never claim the full validation passed.
+Run the smallest failing test or build command, inspect Playwright artifacts and console output, and reduce nondeterministic animation. Do not skip failures or weaken assertions to manufacture a pass.
 
-## Recovery: AWS deployment fails
+## Recovery: CI fails
 
-1. Let the workflow post its failure comment; do not deploy manually from the laptop.
-2. Inspect only the failed step with `gh run view <run-id> --log-failed`.
-3. Check names/availability—not values—of required repository variables.
-4. Confirm OIDC trust uses `repo:OWNER/REPOSITORY:environment:demo` and the job declares `environment: demo`.
-5. Confirm the bucket name contains `demo`, region matches, role policy is scoped to the exact bucket/distribution, and the PR is from the same repository.
-6. Fix configuration or code in a reviewable change, then issue a new `/deploy`. Never fall back to long-lived keys.
+Use GitHub MCP or `gh` to inspect the exact failing check and head SHA. Reproduce locally, fix on the feature branch, push, and wait for the replacement run. Do not merge with failing CI.
 
-## Manual presentation fallback
+## Recovery: Copilot review is unavailable
 
-If deployment cannot be repaired within the session:
+Request it manually from the PR Reviewers panel. If no review completes, report the limitation and inspect available human review threads without fabricating Copilot evidence.
 
-1. Show the local app with `npm run dev`.
-2. Show the active PR, Copilot review findings, and CI checks.
-3. Open the latest `/deploy` workflow and explain its trust/OIDC/validation stages.
-4. Open the previously prepared `DEMO_BASE_URL` only if it is known to be the dedicated demo app; clearly state that it is a rehearsal deployment, not the just-built commit.
-5. Show `docs/architecture.md` if graphify is unavailable.
+## After the webinar
 
-## Cleanup after the webinar
-
-1. Close or retain the feature PR according to the teaching plan; do not merge automatically.
-2. Obtain separate present-tense authorization for deployed-asset cleanup.
-3. Run the default-branch **Destroy deployed demo assets** workflow through the protected `demo` environment, entering `destroy-demo-assets` and the exact resource identifiers.
-4. Verify the bucket has no current keys and the demo URL no longer serves the app; retain the bucket, distribution, OAC, IAM, OIDC, environments, and variables for reuse.
-5. Remove generated `graphify-out/`, Playwright reports, and local build artifacts.
-6. Remove any temporary global MCP entries only if they were created solely for this webinar. Keep the checked-in local config for reproducibility.
-7. Verify no credentials or `.env` files were added to git history.
+- Decide explicitly whether to keep, close, or merge the live feature PR.
+- Remove local build output, browser artifacts, and optional graphify output.
+- Confirm no credentials or `.env` files entered git history.
+- Keep the two reusable skills and the sanitized MCP template for future development demos.

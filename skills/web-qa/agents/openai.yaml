@@ -1,0 +1,4 @@
+interface:
+  display_name: "Web QA"
+  short_description: "Test web changes in real browsers"
+  default_prompt: "Use $web-qa to inspect this web change, fix browser-visible defects, and add regression coverage."

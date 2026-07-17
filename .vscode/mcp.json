@@ -4,29 +4,10 @@
       "type": "http",
       "url": "https://mcp.context7.com/mcp"
     },
-    "openaiDeveloperDocs": {
-      "type": "http",
-      "url": "https://developers.openai.com/mcp"
-    },
     "playwright": {
       "type": "stdio",
       "command": "npx",
       "args": ["-y", "@playwright/mcp@latest"]
-    },
-    "aws_mcp": {
-      "type": "stdio",
-      "command": "uvx",
-      "args": [
-        "mcp-proxy-for-aws==1.6.2",
-        "https://aws-mcp.eu-central-1.api.aws/mcp",
-        "--profile",
-        "NTT",
-        "--region",
-        "eu-central-1",
-        "--metadata",
-        "AWS_REGION=eu-central-1",
-        "--read-only"
-      ]
     }
   }
 }

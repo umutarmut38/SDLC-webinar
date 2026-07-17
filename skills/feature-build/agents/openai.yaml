@@ -1,4 +1,0 @@
-interface:
-  display_name: 'Feature Build'
-  short_description: 'Build the 3D visualizer feature safely'
-  default_prompt: 'Use $feature-build to implement the next reviewable slice of the 3D Cloud Deployment Visualizer.'

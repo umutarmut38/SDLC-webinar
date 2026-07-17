@@ -1,9 +1,8 @@
 # Copilot review instructions
 
-- Treat this repository as a webinar demo scaffold for a client-side React + TypeScript application.
-- Prioritize correctness, security, accessibility, deterministic tests, and live-demo reliability.
-- Flag any secret, long-lived AWS credential, production resource reference, or overly broad GitHub Actions permission.
-- The only approved deployment path is the guarded `/deploy` workflow targeting the `demo` GitHub environment with AWS OIDC.
-- Pay special attention to `issue_comment` trust boundaries, same-repository checkout, exact commit selection, and shell injection.
-- Expect `npm run validate` to pass before changes are considered ready.
-- Do not request expansion of the placeholder into the final 3D experience in environment-preparation reviews.
+- Prioritize correctness, security, accessibility, deterministic behavior, and useful tests.
+- Flag exposed secrets, unsafe browser behavior, unnecessary permissions, and supply-chain risks.
+- Check that interactive 3D behavior has an accessible DOM alternative and reduced-motion handling.
+- Check that unit and browser tests assert meaningful user behavior rather than implementation details.
+- Expect the repository-defined validation command and CI to pass.
+- Do not request deployment, hosting, cloud infrastructure, or unrelated scope expansion.

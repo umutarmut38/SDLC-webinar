@@ -1,13 +1,13 @@
-# Sanitized Codex demo configuration
+# Sanitized local Codex configuration
 
-The live `.codex/` directory is local-only and excluded through `.git/info/exclude` because it may contain credentials. Never stage it.
+The live `.codex/` directory is ignored because it may contain credentials. Never stage it.
 
-`demo-config/.codex/config.toml` is a deliberately authored, credential-free template for the webinar MCP servers. Review it before manually applying its settings to a local Codex project configuration. Do not overwrite an existing `.codex/config.toml` without preserving safe settings and removing literal credentials.
+`demo-config/.codex/config.toml` is the credential-free review copy for the project-local Context7, Playwright, and optional graphify servers. Apply only the required sections to the local `.codex/config.toml`; do not overwrite unrelated settings or expose existing values.
 
-Install the sanitized repository skills from `skills/` into the local `.codex/skills/` directory using the normal Codex skill installation process. Install graphify's project integration with:
+Install graphify locally only when it will be used:
 
 ```bash
 graphify install --project --platform codex
 ```
 
-Keep graphify MCP disabled until `graphify-out/graph.json` has been intentionally generated and verified.
+Keep its MCP entry disabled until a graph has been generated intentionally. Repository-authenticated GitHub MCP is supplied by the Codex environment rather than a token-bearing tracked file.

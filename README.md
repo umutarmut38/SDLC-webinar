@@ -1,15 +1,25 @@
-# Codex Agentic SDLC Webinar
+# SDLC Loop Visualizer
 
-This repository intentionally contains **no application yet**. It is the starting point for a live demonstration in which Codex creates a functioning 3D web application, adds tests and CI, opens a pull request, and drives a repeatable review loop.
+An interactive, entirely client-side 3D map of the software delivery loop: Plan, Code, Test, CI, and Review. Each stage can be inspected independently while a deterministic simulation advances, fails, recovers, completes, and resets the active cycle.
 
-The baseline retains only:
+The WebGL scene is paired with accessible DOM controls and live status, responsive desktop/mobile layouts, reduced-motion behavior, and a resilient renderer fallback.
 
-- durable agent rules in `AGENTS.md`;
-- a minimal live planning artifact in `Plan.md`;
-- the presenter instruction in `DEMO_PROMPT.md`;
-- project-local MCP templates and setup notes;
-- reusable `web-qa` and `pr-review` skills.
+## Local development
 
-Before the webinar, follow `docs/live-demo-runbook.md`. To begin the live build, start a fresh Codex session on clean `main` and paste `DEMO_PROMPT.md`.
+Requires Node.js 22.13 or newer.
 
-There is deliberately no package manager lockfile, source tree, test configuration, CI workflow, deployment workflow, or cloud environment in the baseline. Codex creates the development and review lifecycle live.
+```bash
+npm install
+npx playwright install chromium
+npm run dev
+```
+
+## Validation
+
+```bash
+npm run validate
+```
+
+The validation command checks formatting and linting, runs Vitest unit/component coverage, exercises the primary journey in desktop and mobile Chromium with Playwright, type-checks the project, and creates the production build. Pull requests run the same locked command in GitHub Actions.
+
+Durable webinar instructions remain in `AGENTS.md`, the live implementation record is in `Plan.md`, and the presenter prompt remains in `DEMO_PROMPT.md`. This project deliberately contains no deployment, hosting, cloud, or production integration.

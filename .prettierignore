@@ -1,0 +1,10 @@
+dist
+coverage
+node_modules
+playwright-report
+test-results
+graphify-out
+.codex
+.council
+.council.yaml
+package-lock.json

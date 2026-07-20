@@ -13,7 +13,7 @@ Create an interactive, entirely client-side visualization of the software-develo
 
 Add meaningful unit/component coverage for state and interactions plus Playwright coverage for the primary user journey. Create npm scripts for dev, build, test, test:e2e, and validate. Use the web-qa skill to inspect the running application at desktop and narrow viewports, exercise every control, check accessibility-relevant behavior and browser console errors, fix defects, and add regression coverage. Run npm run validate until it passes.
 
-Create a minimal-permission GitHub Actions CI workflow that installs locked dependencies and runs npm run validate on pull requests and pushes to main. Review the intended diff and secret safety, commit it, push the feature branch, and open a draft PR with scope and validation evidence. Use GitHub MCP to watch CI on the exact head SHA.
+Create a minimal-permission GitHub Actions CI workflow that installs locked dependencies and runs npm run validate only for `pull_request` events. Do not add a `push` trigger, push commits to `main`, or let the workflow modify or merge `main`. Review the intended diff and secret safety, commit it, push only the feature branch, and open a draft PR with scope and validation evidence. Use GitHub MCP to watch CI on the exact head SHA.
 
 After CI succeeds, use the pr-review skill for two rounds. Address every actionable finding with code or a posted technical rationale, never ignore security findings, rerun validation, push fixes, and wait for CI after each changed round.
 

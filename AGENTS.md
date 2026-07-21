@@ -2,33 +2,28 @@
 
 ## Purpose
 
-This repository is the intentionally empty application baseline for a live Codex webinar. During the demo, Codex creates a tested 3D architecture explorer called System Atlas from scratch and drives it through CI and pull-request review. There is no prepared application, package manifest, test suite, CI workflow, deployment workflow, or cloud integration.
+This repository is the intentionally empty application baseline for a live Codex webinar. During the demo, Codex creates a tested, client-side 3D web application from scratch and drives it through CI and pull-request review. There is no prepared application, package manifest, test suite, CI workflow, deployment workflow, or cloud integration.
 
-`AGENTS.md` contains durable operating rules. `Plan.md` is the live working plan and must be filled in as implementation decisions are made. `DEMO_PROMPT.md` is presenter input, not a skill.
+`AGENTS.md` contains durable operating rules. `DEMO_PROMPT.md` is presenter input, not a skill or a source of reusable repository behavior.
 
 ## Start every substantial task
 
-1. Inspect `git status`, the current branch, `Plan.md`, and relevant tracked files.
+1. Inspect `git status`, the current branch, and relevant tracked files.
 2. Preserve unrelated user work and identify external actions before taking them.
-3. Update `Plan.md` with a bounded implementation plan before broad edits.
+3. Present a bounded implementation plan in the session before broad edits and keep it current as work progresses.
 4. Work on a feature branch; never build the application directly on `main`.
 5. Prefix every shell command with `rtk`; prefix every segment in a command chain.
 
 Use `rg` or `rg --files` for repository search and `apply_patch` for hand-edited files.
 
-## Application direction
+## Project boundaries
 
-- Build System Atlas, an entirely client-side 3D architecture and dependency explorer, with React and TypeScript.
-- Use React Three Fiber, Three.js, and Drei for the 3D experience.
-- Use typed, deterministic sample data for 8–10 components and their directed dependencies.
-- Give every component a fixed 3D position, a category, and a health status; do not use force-directed physics.
-- Support search, category filtering, canvas and DOM-list selection, component focus, dependency details, and a full reset.
-- Use a refined dark-observatory visual language with luminous category-colored nodes, depth fog, a restrained star field, and dependency signals.
-- Provide accessible DOM controls and status summaries alongside WebGL content, and preserve all information when reduced motion is requested.
+- Build an entirely client-side 3D web application with React and TypeScript.
+- Provide accessible DOM controls and status summaries alongside canvas or WebGL content.
+- Preserve essential information and interactions when reduced motion is requested or WebGL content is unavailable.
 - Treat responsive layout, reduced motion, loading/error states, accessibility, and browser-console errors as completion concerns.
 - Keep state deterministic enough for unit and browser tests.
-- Do not add editing, JSON import, persistence, or a backend.
-- Do not add deployment workflows, cloud credentials, infrastructure, or production integrations.
+- Do not add a backend, deployment workflows, cloud credentials, infrastructure, hosting, or production integrations.
 
 ## Tool policy
 

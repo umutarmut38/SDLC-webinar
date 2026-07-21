@@ -3,9 +3,9 @@
 Paste the following into a fresh Codex session on clean, updated `main`:
 
 ```text
-Follow AGENTS.md and use Plan.md as the live planning artifact.
+Follow AGENTS.md.
 
-Build System Atlas, a polished 3D architecture and dependency explorer, from this intentionally empty application baseline. First inspect the repository, GitHub authentication, available MCP tools, and current branch. Update Plan.md with a concise, slice-by-slice implementation plan, then create and switch to the feature branch demo/system-atlas. Do not edit directly on main.
+Build System Atlas, a polished 3D architecture and dependency explorer, from this intentionally empty application baseline. First inspect the repository, GitHub authentication, available MCP tools, and current branch. Before modifying files, present a concise, slice-by-slice implementation plan in the session and keep it updated as work progresses. Then create and switch to the feature branch demo/system-atlas. Do not edit directly on main.
 
 Use Context7 before choosing or implementing library-specific APIs. Create a Vite + React + TypeScript project at the repository root without deleting the existing instructions, prompts, MCP templates, or skills. Install current compatible versions of React, React Three Fiber, Three.js, Drei, Vitest, Testing Library, Playwright, and the minimal code-quality tooling needed for a single npm run validate command.
 

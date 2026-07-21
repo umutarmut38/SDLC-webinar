@@ -32,7 +32,7 @@ Then make the harmless MCP calls described in `docs/mcp-setup.md`. Do not create
 
 1. Open a fresh Codex session on clean `main`.
 2. Paste the instruction in `DEMO_PROMPT.md`.
-3. Let Codex inspect and update `Plan.md` before implementation.
+3. Let Codex inspect the repository, present its in-session plan, and keep that plan updated during implementation.
 4. Narrate the visible Context7, browser QA, CI, and review transitions.
 5. End with an open, green, reviewed PR. Do not merge it.
 

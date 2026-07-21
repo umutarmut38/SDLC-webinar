@@ -5,7 +5,6 @@ This repository intentionally contains **no application yet**. It is the startin
 The baseline retains only:
 
 - durable agent rules in `AGENTS.md`;
-- a minimal live planning artifact in `Plan.md`;
 - the presenter instruction in `DEMO_PROMPT.md`;
 - project-local MCP templates and setup notes;
 - reusable `web-qa` and `pr-review` skills.

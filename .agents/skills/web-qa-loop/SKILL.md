@@ -1,5 +1,5 @@
 ---
-name: web-qa
+name: web-qa-loop
 description: Inspect and validate a local web application in real browsers, exercise user-visible workflows across desktop and mobile viewports, diagnose console and accessibility problems, fix defects, add regression tests, and run the repository's validation command. Use after implementing or changing web UI behavior, or whenever browser-visible quality must be verified.
 ---
 

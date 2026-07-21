@@ -7,7 +7,7 @@ The baseline retains only:
 - durable agent rules in `AGENTS.md`;
 - the presenter instruction in `DEMO_PROMPT.md`;
 - project-local MCP templates and setup notes;
-- reusable `web-qa` and `pr-review` skills.
+- reusable `web-qa-loop` and `pr-review-loop` skills under `.agents/skills/`.
 
 Before the webinar, follow `docs/live-demo-runbook.md`. To begin the live build, start a fresh Codex session on clean `main` and paste `DEMO_PROMPT.md`.
 

@@ -23,7 +23,7 @@ command = "npx"
 args = ["-y", "@playwright/mcp@latest"]
 ```
 
-Before the webinar, confirm the MCP exposes browser tools. During the build, use the `web-qa` skill after the application can run locally.
+Before the webinar, confirm the MCP exposes browser tools. During the build, use the `web-qa-loop` skill after the application can run locally.
 
 ## GitHub
 

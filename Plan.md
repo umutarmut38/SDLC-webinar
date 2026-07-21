@@ -2,13 +2,14 @@
 
 ## Goal
 
-Create a polished, interactive 3D SDLC Visualizer from this intentionally empty application baseline, test it locally and in CI, and complete a bounded pull-request review loop.
+Create System Atlas, a polished, interactive 3D architecture and dependency explorer, from this intentionally empty application baseline; test it locally and in CI, then complete a bounded pull-request review loop.
 
 ## Success criteria
 
 - [ ] A Vite, React, and TypeScript application exists at the repository root.
-- [ ] The 3D experience communicates Plan, Code, Test, CI, and Review states.
-- [ ] User-visible interactions are accessible, responsive, and deterministic.
+- [ ] Typed, deterministic sample data describes 8–10 architecture components and their directed dependencies.
+- [ ] Search, category filtering, selection, focus, dependency details, and full reset work from accessible controls.
+- [ ] The responsive 3D experience presents a polished dark-observatory System Atlas without hiding information behind motion or WebGL.
 - [ ] Unit/component tests and Playwright browser tests cover meaningful behavior.
 - [ ] One validation command covers code quality, tests, type checking, and build.
 - [ ] GitHub Actions CI runs that validation command on the feature PR.
@@ -19,6 +20,8 @@ Create a polished, interactive 3D SDLC Visualizer from this intentionally empty 
 
 - Application dependencies are installed live from a cold npm cache.
 - Context7 is consulted before library-specific implementation.
+- The product uses checked-in sample data, fixed node positions, and no force-directed layout, editing, import, persistence, or backend.
+- The live scope targets 20–30 minutes: the architecture explorer and its core interactions matter more than extra simulation features.
 - `web-qa` handles recurring browser validation; `pr-review` handles the review loop.
 - graphify is optional after code exists and is not a success gate.
 - Deployment, hosting, AWS, and PR merging are out of scope.

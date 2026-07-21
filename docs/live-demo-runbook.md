@@ -38,7 +38,7 @@ Then make the harmless MCP calls described in `docs/mcp-setup.md`. Do not create
 
 ## Recovery: implementation takes too long
 
-Reduce the application to five deterministic 3D nodes, stage selection, advance/reset, and one simulated failure. Preserve accessible controls, meaningful tests, CI, and the review loop; move visual polish into PR follow-up notes.
+Reduce the application to six fixed architecture nodes with search, selection, and a dependency detail panel. Remove animated dependency signals and advanced camera transitions first. Preserve accessible controls, meaningful tests, CI, and the review loop; move extra visual polish into PR follow-up notes.
 
 ## Recovery: dependency installation fails
 

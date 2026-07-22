@@ -33,7 +33,7 @@ Use Context7 before implementing library-specific APIs. Resolve documentation fo
 
 ### Playwright
 
-Use the `web-qa` skill for repeatable browser QA. Playwright MCP complements the checked-in Playwright suite that will be created during the live build; it does not replace automated tests.
+Use the `web-qa-loop` skill for repeatable browser QA. Playwright MCP complements the checked-in Playwright suite that will be created during the live build; it does not replace automated tests.
 
 ### GitHub
 
@@ -45,8 +45,9 @@ graphify is optional and becomes useful only after code exists. If `graphify-out
 
 ## Reusable skills
 
-- `web-qa` is for recurring local browser inspection, defect fixing, and regression validation.
-- `pr-review` is for recurring bounded Copilot review loops on an active PR.
+- Keep repository-local skills under `.agents/skills/<name>/SKILL.md` so Codex discovers them from a fresh clone.
+- `web-qa-loop` is for recurring local browser inspection, defect fixing, and regression validation.
+- `pr-review-loop` is for recurring bounded Copilot review loops on an active PR.
 
 Product briefs, webinar preflight, and feature implementation instructions are prompts or runbook steps, not skills.
 
@@ -69,7 +70,7 @@ Create GitHub Actions CI as part of the live application work. CI must install l
 - Commit only intended application, test, CI, and documentation changes.
 - Push without force and open a draft PR with scope and validation evidence.
 - Wait for CI on the exact head SHA.
-- Use `pr-review` for two rounds unless the user chooses another positive count.
+- Use `pr-review-loop` for two rounds unless the user chooses another positive count.
 - Address every actionable finding or post a clear technical rationale; never ignore security findings.
 - Do not merge unless the user explicitly requests it.
 

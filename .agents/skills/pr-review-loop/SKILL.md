@@ -1,5 +1,5 @@
 ---
-name: pr-review
+name: pr-review-loop
 description: Run a bounded GitHub Copilot review loop on the active branch's pull request, collect actionable review threads, implement or explain each finding, validate and push fixes, and wait for CI. Use whenever a PR needs one or more repeatable Copilot review rounds; default to two rounds.
 ---
 

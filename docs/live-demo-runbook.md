@@ -8,7 +8,7 @@
 - [ ] `gh` and GitHub MCP authenticate as the intended account.
 - [ ] Context7 completes a harmless library lookup in a fresh Codex session.
 - [ ] Playwright MCP exposes browser tools.
-- [ ] `pr-review` and `web-qa` are installed project-locally and validate structurally.
+- [ ] Codex discovers `pr-review-loop` and `web-qa-loop` from `.agents/skills/` and both validate structurally.
 - [ ] Copilot review remains enabled for this repository/account.
 - [ ] Internet access is available for the intentionally cold npm installation.
 - [ ] No deployment, hosting, AWS, or production integration is configured.

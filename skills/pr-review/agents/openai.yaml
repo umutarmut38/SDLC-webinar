@@ -1,4 +1,0 @@
-interface:
-  display_name: "PR Review"
-  short_description: "Run bounded Copilot review and fix loops"
-  default_prompt: "Use $pr-review for two rounds on the active pull request and address every actionable finding."

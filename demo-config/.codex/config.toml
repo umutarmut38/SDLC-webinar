@@ -1,11 +1,20 @@
 # Credential-free project template. Never add literal credentials to this file.
 
+model = "gpt-5.6-terra"
+model_reasoning_effort = "medium"
+
+[agents]
+enabled = true
+max_concurrent_threads_per_session = 2
+default_subagent_model = "gpt-5.6-luna"
+default_subagent_reasoning_effort = "medium"
+
 [mcp_servers.context7]
 url = "https://mcp.context7.com/mcp"
 
 [mcp_servers.playwright]
 command = "npx"
-args = ["-y", "@playwright/mcp@latest"]
+args = ["-y", "@playwright/mcp@0.0.80", "--isolated"]
 
 # Enable only after code exists and graphify-out/graph.json has been generated intentionally.
 [mcp_servers.graphify]

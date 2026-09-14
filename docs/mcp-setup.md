@@ -45,7 +45,9 @@ Before the webinar, confirm the MCP exposes browser tools and can open and close
 
 Use the GitHub MCP integration provided by the Codex environment for PR metadata, comments, reviews, threads, and check state. Confirm it returns the intended `github.com` identity before the webinar. Use authenticated `gh` only for operations the MCP does not expose; do not add a token to tracked MCP configuration.
 
-At live handoff, observe CI for the exact PR head SHA and use `pr-review-loop` in `request-only` mode. Do not wait for green CI or a completed remote review inside the 30-minute budget. Distinguish a local Sol review from GitHub Copilot feedback.
+During the live remote phase, the coordinator uses `pr-review-loop` in `review-and-fix` mode for up to two rounds. Wait for successful validation CI associated with the exact PR head SHA, request GitHub Copilot review, wait for the completed review, handle findings, validate/push fixes, and observe replacement CI. Request a second review of the updated head after fixes when time permits; stop early if the review is clean.
+
+Reserve one shared ten-minute budget within the 30-minute demo for all initial/replacement CI, review waits, repairs, validation, and pushes. Do not reset the budget or treat a request acknowledgment as a completed review. Return review IDs, reviewed SHAs, finding/fix references, and CI run links/results. If services or the deadline prevent completion, report the unfinished milestone. The local Sol review does not satisfy the GitHub Copilot review requirement.
 
 ## graphify
 

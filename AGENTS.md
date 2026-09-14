@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This repository is the intentionally empty application baseline for a roughly 30-minute Codex webinar. During the demo, Codex builds WeekPlan, a client-side weekly workload planner, validates it locally, and opens a draft pull request. Remote CI and Copilot review may finish afterward. There is no prepared application, package manifest, test suite, CI workflow, deployment workflow, or cloud integration.
+This repository is the intentionally empty application baseline for a roughly 30-minute Codex webinar. During the demo, Codex builds WeekPlan, a client-side weekly workload planner, validates it locally, opens a draft pull request, waits for CI, and runs up to two GitHub Copilot review/fix rounds live. Reserve roughly 20 minutes for the build/local checks/PR and 10 minutes for CI and remote review. There is no prepared application, package manifest, test suite, CI workflow, deployment workflow, or cloud integration.
 
 `AGENTS.md` contains durable operating rules. `DEMO_PROMPT.md` is presenter input, not a skill or a source of reusable repository behavior.
 
@@ -34,7 +34,7 @@ Use `rg` or `rg --files` for repository search and `apply_patch` for hand-edited
 - Run the UI and test workers in parallel after scaffolding. The coordinator continues with its own independent implementation work.
 - Once the app is runnable, freeze edits while the browser verifier and reviewer inspect the same version. They report findings without editing source; the coordinator assigns fixes afterward.
 - Prefer medium reasoning and compact handoffs: files changed or inspected, checks actually run, concrete findings, and blockers. Do not launch extra agents for trivial lookups.
-- Use one initial browser pass and one local Sol review, followed by one repair phase and targeted rechecks. Do not start repeated polish or review cycles.
+- Use one initial browser pass and one local Sol review, followed by one repair phase and targeted rechecks. These local checks are separate from the bounded GitHub Copilot review/fix rounds below; do not start extra local polish/review cycles.
 - The 30-minute target is a planning budget, not permission to skip checks. Cut optional polish first; report unresolved failures and an incomplete demo if necessary.
 
 ## Tool policy
@@ -92,12 +92,15 @@ For setup-only documentation/configuration changes, do not scaffold the applicat
 
 - During the live build, commit only intended application, test, CI, and documentation changes.
 - Push without force and open a draft PR with scope and validation evidence.
-- Check CI on the exact head SHA and report its observed state. A green remote run is not a prerequisite for the live handoff.
-- During the live window, invoke `pr-review-loop` in `request-only` mode to request one Copilot review and hand off without polling. Resume its default single round after the demo if requested; do not create a duplicate request.
-- Address every actionable finding or post a clear technical rationale; never ignore security findings.
-- Pending remote feedback remains an explicit follow-up, not a completed review. After review fixes, run full validation and observe replacement CI before claiming the review work complete.
+- During the live window, the coordinator invokes `pr-review-loop` in `review-and-fix` mode for up to two rounds, not `request-only`. First wait for successful repository validation CI associated with the exact PR head SHA. Missing, queued, skipped, cancelled, or failed checks are not green.
+- Request a GitHub Copilot review on GitHub and wait for its actual completed result. Reuse equivalent pending requests. The local Sol reviewer is not a substitute for remote Copilot review.
+- Address every actionable finding or post a clear technical rationale; never ignore security findings. Add regression coverage, recheck changed browser workflows when relevant, run full validation, commit/push intended fixes, and wait for CI on each new SHA.
+- Request a second review of the updated head after first-round code fixes if sufficient time remains. Stop early after a completed clean review; never manufacture findings, create empty commits, or start a third round.
+- Use one shared ten-minute remote-phase budget capped by the remaining 30-minute session. It includes initial/replacement CI, review waits, fixes, validation, and pushes. Do not reset it per round or wait; poll at least 30 seconds apart, with at most five minutes per wait.
+- At budget expiry or a blocker, preserve unfinished work and report it explicitly; do not push unvalidated fixes or resolve unfinished findings. A pending review or non-green final CI means the full live goal was not met.
+- A successful live handoff requires passing local validation, an open draft PR, successful CI on the final head, and at least one completed GitHub Copilot review with its actionable feedback handled. Report reviewed SHAs separately from the final head; fixes after the last review are not automatically re-reviewed.
 - Do not merge unless the user explicitly requests it.
 
 ## Completion handoff
 
-Report the user-visible result, files changed, commands and checks run, MCP evidence, branch/commit/PR/CI state, local review findings, pending remote feedback, remaining risks, and secret/deployment safety. Distinguish passed, failed, pending, and not-run checks. For setup-only work, also report which fresh-session preflight checks remain.
+Report the user-visible result, files changed, commands and checks run, MCP evidence, branch/commit/PR/CI state, local review findings, remote review count/links/reviewed SHAs, fixes and rationales, pending feedback, remaining risks, and secret/deployment safety. Distinguish passed, failed, pending, and not-run checks. For setup-only work, also report which fresh-session preflight checks remain.

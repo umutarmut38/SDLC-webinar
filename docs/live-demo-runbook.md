@@ -2,9 +2,9 @@
 
 ## Success boundary
 
-Target roughly 30 minutes for a working WeekPlan app, passing local validation, and an open draft PR. Check remote CI once and request one Copilot review without waiting. Pending remote work is an explicit follow-up, not a passed check. Never merge during the demo.
+Target roughly 30 minutes for a working WeekPlan app, passing local validation, and an open draft PR with green CI and at least one completed GitHub Copilot review whose actionable findings have been handled. Reserve about 20 minutes for the build/local checks/PR and 10 minutes for initial CI plus up to two live Copilot review/fix rounds. Stop early after a clean review; request the second review after code fixes when time permits. Never merge during the demo.
 
-This is a rehearsal budget, not a promise that remote services or repairs fit the clock. Aim to finish rehearsal in 22-25 minutes to leave live narration and recovery margin.
+The ten-minute remote phase uses one deadline shared by CI, reviews, repairs, validation, and pushes, capped by the 30-minute session. This is a rehearsal target, not a promise about GitHub queue times. If remote work does not finish, explicitly report that the full live goal was not met. A request-only handoff is not the planned finish line.
 
 ## Pre-demo checklist
 
@@ -19,6 +19,7 @@ This is a rehearsal budget, not a promise that remote services or repairs fit th
 - [ ] The pinned Playwright MCP starts and exposes browser tools; required browser binaries are already installed.
 - [ ] The subagent MCP smoke test shows real Context7 calls from both Luna workers and Playwright calls from the Terra browser-verifier, not only parent-session probes.
 - [ ] Copilot review remains enabled for this repository/account; missing access is disclosed rather than discovered at the last minute.
+- [ ] During rehearsal, measure initial CI, Copilot review, fix validation, and replacement CI duration. Confirm review and re-review can be requested on the draft PR; a model/tool smoke test does not prove this.
 - [ ] Tool/package caches are warmed and internet access is available. A cold install is not a demo requirement.
 - [ ] No deployment, hosting, cloud credentials, or production integration is configured.
 
@@ -90,6 +91,7 @@ Inspect the child tool-call records rather than accepting an unsupported "MCP av
 3. Warm npm/tool caches and browser binaries. Playwright MCP `0.0.80` and Playwright test runner `1.63.0` were available during setup; confirm compatible browser installation in rehearsal rather than assuming their browser revisions are interchangeable.
 4. Before the live run, return to the clean prepared baseline. Do not carry generated app files, node_modules, test output, or a rehearsal lockfile into it. Prefer a separate worktree for rehearsal so there is no destructive cleanup or accidental application scaffold on the baseline.
 5. Disclose any use of a rehearsed application branch as recovery. Do not present prebuilt code as newly generated.
+6. Rehearse the actual `pr-review-loop` in `review-and-fix` mode for up to two rounds. Keep review IDs, reviewed SHAs, CI links, and elapsed times. If Copilot reports no actionable findings, show that result; do not deliberately add defects to force a fix demonstration.
 
 ## Start the live demo
 
@@ -98,21 +100,26 @@ Inspect the child tool-call records rather than accepting an unsupported "MCP av
 3. Let Codex inspect, create its feature branch, establish file ownership, and delegate UI/tests while the coordinator implements shared logic.
 4. Show the actual agent activity, then the browser acceptance journey: move 2h off overloaded Wednesday, complete it on Thursday, and reload.
 5. Narrate one Terra browser pass, one Sol local review, and the resulting fixes. They are not substitutes for the checked-in tests or remote Copilot review.
-6. End with local validation evidence and a draft PR. Report the exact head SHA, observed CI state, and whether remote review was requested/completed/pending/unavailable. Do not merge.
+6. Aim to open the draft PR by minute 20. Invoke `pr-review-loop` in `review-and-fix` mode for up to two rounds with one shared ten-minute budget, capped by the remaining live time.
+7. Show initial CI succeeding on the PR head, request GitHub Copilot review, and wait for its actual result. Summarize findings, fix them or explain why no change is needed, add regression tests, validate, push, and show replacement CI.
+8. If first-round code fixes and the remaining budget warrant it, request a second review on the updated head and handle its feedback the same way. Stop early after a clean review; never start a third round.
+9. End with review/fix evidence, final head SHA and CI result. Report reviewed SHAs separately from any later fixes, and disclose unresolved, pending, failed, or unavailable work. Do not merge.
 
 ## Live checkpoints
 
 | Elapsed | Expected checkpoint | If behind |
 | --- | --- | --- |
 | 0-3 min | Plan, branch, scaffold, shared contract | Avoid framework/design exploration |
-| 3-14 min | UI/tests in parallel; coordinator integrates domain/storage/config | Stop optional styling, retain native controls |
-| 14-21 min | Runnable app, one browser pass and local review, one repair phase | Fix blockers only; no extra review cycle |
-| 21-26 min | Full local validation | Diagnose the smallest failure; never skip or weaken checks |
-| 26-30 min | Draft PR, one remote review request, evidence | Report pending/unavailable remote work and hand off |
+| 3-12 min | UI/tests in parallel; coordinator integrates domain/storage/config | Stop optional styling, retain native controls |
+| 12-17 min | Runnable app, one browser pass and local review, one repair phase | Fix blockers only; no extra local review cycle |
+| 17-20 min | Full local validation, commit/push, draft PR | Diagnose failures; never skip checks to start CI early |
+| 20-30 min | Initial green CI; Copilot review, fixes, validation/push, replacement CI; second review if time permits | Use one deadline; report the unfinished goal if the budget expires |
+
+Within the remote phase, check at most every 30 seconds and wait no more than five minutes per CI/review result, always bounded by the remaining shared budget. Do not restart the clock after a fix or use a successful older workflow run as evidence for the new head.
 
 ## Recovery: implementation takes too long
 
-Keep one workweek, native selectors, task CRUD/completion, capacity warnings, persistence, and meaningful tests. Remove decorative polish, not the acceptance journey or accessibility. Stop after the planned repair phase and report any unresolved blockers; do not claim completion if local validation or the draft-PR milestone is missing.
+Keep one workweek, native selectors, task CRUD/completion, capacity warnings, persistence, and meaningful tests. Remove decorative polish, not the acceptance journey or accessibility, to protect the remote-review window. Do not silently revert to request-only mode. If there is not enough time to finish CI/review, preserve work and report the unfinished goal rather than skipping validation or claiming success.
 
 ## Recovery: dependency installation fails
 
@@ -128,16 +135,16 @@ Run the smallest failing test or build command, inspect Playwright artifacts and
 
 ## Recovery: CI fails
 
-Record the exact failing check and head SHA, and hand off a follow-up if the live budget is exhausted. After the demo, reproduce locally, fix on the feature branch, run full validation, push, and observe replacement CI. Never label a failed or pending run green.
+Inspect the failing check/logs and exact head SHA. Within the remaining shared budget, reproduce locally, fix on the feature branch, run full validation, push, and wait for replacement CI before requesting the next review. If time expires, preserve work and report the unfinished CI/review milestone. Never label missing, skipped, cancelled, failed, or pending validation green.
 
 ## Recovery: Copilot review is unavailable
 
-Make one supported request attempt. If unavailable, record the manual Reviewers-panel action for later; do not spend the remaining live window polling. The local Sol review can still be shown, but must not be described as a completed GitHub Copilot review.
+Make one supported request attempt. If it fails, report the failure and ask the presenter to use the Reviewers panel when possible. Continue only after the request is observable and within the original deadline; otherwise stop as unavailable. If accepted but delayed, poll within the wait/total limits. The local Sol review is not a completed GitHub Copilot review, and missing remote feedback means the full live goal was not met.
 
 ## After the webinar
 
-- Observe CI and the requested Copilot review on the exact head SHA.
-- If requested, resume `pr-review-loop` for one round, reusing the recorded pending request. Fix or explain every actionable finding, validate, push, and observe replacement CI.
+- If the live loop timed out, retain its request/review IDs, reviewed SHAs, pending CI links, unfinished findings, and any unvalidated local changes.
+- Resume outstanding CI/review/fix work only when requested, using an explicit follow-up budget and the recorded pending request rather than creating duplicates. Further rounds beyond the live cap require a new request.
 - Decide explicitly whether to keep, close, or merge the live feature PR; never merge automatically.
 - Stop only servers owned by the demo. Clean up only identified demo artifacts; preserve unrelated work and the baseline.
 - Confirm no credentials or `.env` files entered git history.

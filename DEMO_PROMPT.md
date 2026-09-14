@@ -5,7 +5,7 @@ Paste the following into a fresh Codex session on the clean, prepared baseline a
 ```text
 Follow AGENTS.md.
 
-Build WeekPlan, a practical weekly workload planner, from this intentionally empty application baseline. Target roughly 30 minutes for a working app, passing local validation, and an open draft PR. Remote CI and Copilot review may finish afterward.
+Build WeekPlan, a practical weekly workload planner, from this intentionally empty application baseline. Target roughly 30 minutes: about 20 minutes to build, validate locally, and open a draft PR, then about 10 minutes to observe green CI and run up to two GitHub Copilot review/fix rounds live. A review request alone is not completion.
 
 START AND DELEGATE
 Inspect the repository, current branch, available MCP tools, and GitHub authentication without printing private configuration. Confirm the four custom agents are available. Present a short timed plan, then create and switch to demo/weekplan. If that branch already exists, choose a fresh suffix rather than resetting it. Never build on main.
@@ -40,12 +40,22 @@ Once the app runs and the two workers are closed, freeze source edits for one in
 
 Then perform one coordinated repair phase, add regression coverage, recheck corrected workflows, and run npm run validate. Use targeted checks while iterating. Do not weaken assertions, ignore security findings, or claim failed/unavailable checks passed. Cut optional styling first if time runs short; report an incomplete outcome if blockers remain.
 
-HANDOFF
+LIVE CI AND GITHUB COPILOT REVIEW
 Create a GitHub Actions workflow with read-only contents permission, locked dependency installation, Chromium installation, and npm run validate. Use pull_request events only, not push. The workflow must not modify or merge main.
 
-After local validation passes, inspect the intended diff and secret safety, commit only intended files, push the feature branch without force, and open a draft PR with scope and validation evidence. Use pr-review-loop in request-only mode to request one Copilot review; do not wait for it or start remote repair rounds during the live window. Observe CI/check state for the exact head SHA once and report pending states honestly. If GitHub is unavailable, preserve local work and state that the draft-PR milestone was not met.
+After local validation passes, inspect the intended diff and secret safety, commit only intended files, push the feature branch without force, and open a draft PR with scope and validation evidence. The coordinator must use the pr-review-loop skill in review-and-fix mode for up to two rounds, with one shared ten-minute budget capped by the remaining live session time. Do not select request-only mode or stop merely because the PR was opened.
 
-Budget: 0-3 min plan/scaffold/contracts; 3-14 min parallel build/tests; 14-21 min inspection and repairs; 21-26 min full validation; 26-30 min draft PR and evidence. Do not trade correctness for the clock or extend into repeated polish/review loops.
+First wait for the repository validation CI run associated with the exact PR head SHA to complete successfully. Missing, queued, cancelled, skipped, or failed checks are not green. If CI fails, inspect logs, fix the cause, run full local validation, push only intended fixes, and observe replacement CI within the same budget.
 
-No backend, accounts, collaboration, calendar integration, recurring tasks, AI scheduling, 3D, deployment, hosting, or production integration. Do not generate a graph or make graphify a completion gate. Do not merge. Finish with the app result, validation evidence, local findings and fixes, branch/head SHA/PR URL, observed CI and remote-review states, and remaining follow-up.
+Once CI is green, explicitly request GitHub Copilot to review the PR on GitHub. Record request evidence and reviewed head SHA; reuse an equivalent pending request rather than duplicating it. Wait for the actual completed review, read its summary and all actionable threads/comments, and show a concise finding-to-fix summary. Do not substitute the local Sol review for this remote review.
+
+Fix actionable findings with regression tests, or post a concrete technical rationale for findings that do not require a code change. Never ignore security findings or resolve unfinished work. After code changes, recheck affected browser behavior with Playwright MCP when applicable, run npm run validate, commit/push the fixes, and wait for CI on the new head SHA. Reply to the review threads with fix references or rationale.
+
+If the first round changed code and enough budget remains, request a second Copilot review of the updated head, wait for its result, and handle findings with the same validation/push/CI process. Stop early after a completed review with no actionable findings; do not manufacture changes just to show another round. Never start a third round. If the last round introduces fixes, report which SHA was reviewed and which final SHA passed CI; do not claim the new SHA was re-reviewed unless it actually was.
+
+Use one shared deadline across initial CI, review waits, fixes, local validation, pushes, replacement CI, and any second round. Poll no more often than every 30 seconds and wait at most five minutes for any individual CI/review result, always bounded by the remaining total budget. At a deadline or service blocker, stop starting new work and report exactly what is pending, failed, unavailable, or unvalidated; preserve local changes and do not push unvalidated fixes. Pending remote work means the full live goal was not met, not that review completed successfully.
+
+Budget: 0-3 min plan/scaffold/contracts; 3-12 min parallel build/tests; 12-17 min local browser inspection/review and repairs; 17-20 min full validation and draft PR; 20-30 min initial CI plus up to two remote Copilot review/fix rounds and evidence. Cut optional polish first to protect the remote-review window. Timing is a rehearsal target, not a guarantee about GitHub queues.
+
+No backend, accounts, collaboration, calendar integration, recurring tasks, AI scheduling, 3D, deployment, hosting, or production integration. Do not generate a graph or make graphify a completion gate. Do not merge. Finish with the app result, local validation and MCP evidence, branch/head SHA/PR URL, CI run links/results for the final head, completed remote review count and reviewed SHAs, findings/fixes/rationales, and any remaining follow-up.
 ```

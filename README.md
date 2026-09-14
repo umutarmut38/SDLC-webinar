@@ -2,7 +2,9 @@
 
 This repository intentionally contains **no application yet**. It prepares a roughly 30-minute live demonstration in which Codex builds **WeekPlan**, a useful weekly workload planner, with a small team of specialized agents.
 
-The live finish line is a working app, passing local validation, and an open draft PR. Remote CI and one Copilot review may finish afterward; pending checks are never presented as passed.
+The live finish line is a working app, passing local validation, and an open draft PR with green CI and at least one completed GitHub Copilot review whose actionable findings have been handled. Target about 20 minutes for implementation/local checks/PR and 10 minutes for CI plus up to two remote review/fix rounds. Stop early after a clean review; request a second review after fixes when time permits.
+
+The remote phase is part of the live demo, not a request-only handoff. GitHub queue times are not guaranteed: if the shared budget expires, report the unfinished goal honestly rather than presenting pending checks as passed. There is no deployment or automatic merge.
 
 ## The product
 

@@ -1,4 +1,4 @@
 interface:
   display_name: "PR Review Loop"
   short_description: "Run bounded Copilot review and fix loops"
-  default_prompt: "Use $pr-review-loop for two rounds on the active pull request and address every actionable finding."
+  default_prompt: "Use $pr-review-loop in review-and-fix mode for up to two rounds within one shared ten-minute budget: wait for CI, request and read GitHub Copilot review, fix findings, validate and push fixes, and wait for replacement CI. Stop early after a clean review and report unfinished work honestly."

@@ -99,14 +99,19 @@ function App() {
   const persist = (
     nextPlan: Plan,
     successMessage = 'Saved in this browser.',
-  ) => {
+  ): boolean => {
     if (recoveryRequired) {
       setNotice({
         kind: 'warning',
         message:
           'Clear unreadable saved data before making changes. Your existing browser data was left unchanged.',
       })
-      return
+      return false
+    }
+    const error = savePlan(nextPlan)
+    if (error) {
+      setNotice({ kind: 'error', message: error })
+      return false
     }
     setPlan(nextPlan)
     setCapacityDrafts(
@@ -114,12 +119,8 @@ function App() {
         weekdays.map((day) => [day, String(nextPlan.capacities[day])]),
       ) as Record<Weekday, string>,
     )
-    const error = savePlan(nextPlan)
-    if (error) {
-      setNotice({ kind: 'error', message: error })
-      return
-    }
     setNotice({ kind: 'success', message: successMessage })
+    return true
   }
 
   const handleAddTask = (event: React.FormEvent<HTMLFormElement>) => {
@@ -130,12 +131,15 @@ function App() {
       setTaskError(error)
       return
     }
-    persist(
-      addTask(plan, input, taskId()),
-      'Task added and saved in this browser.',
-    )
-    setTaskDraft(blankTaskDraft())
-    setTaskError(null)
+    if (
+      persist(
+        addTask(plan, input, taskId()),
+        'Task added and saved in this browser.',
+      )
+    ) {
+      setTaskDraft(blankTaskDraft())
+      setTaskError(null)
+    }
   }
 
   const beginEdit = (task: Task) => {
@@ -155,12 +159,15 @@ function App() {
       setEditingError(error)
       return
     }
-    persist(
-      updateTask(plan, taskIdToUpdate, input),
-      'Task updated and saved in this browser.',
-    )
-    setEditingTaskId(null)
-    setEditingError(null)
+    if (
+      persist(
+        updateTask(plan, taskIdToUpdate, input),
+        'Task updated and saved in this browser.',
+      )
+    ) {
+      setEditingTaskId(null)
+      setEditingError(null)
+    }
   }
 
   const handleCapacityChange = (day: Weekday, value: string) => {

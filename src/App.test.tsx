@@ -44,11 +44,22 @@ describe('WeekPlan accessible task workflow', () => {
       screen.getByText('Over capacity by 2h. Move or shorten a task.'),
     ).toBeInTheDocument()
 
+    fireEvent.change(screen.getByLabelText(/Task title/), {
+      target: { value: 'Keep this task' },
+    })
+    fireEvent.change(screen.getByLabelText(/Effort \(minutes\)/), {
+      target: { value: '30' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Add task' }))
+
     vi.spyOn(window, 'confirm').mockReturnValue(false)
     fireEvent.click(screen.getByRole('button', { name: 'Load example week' }))
     expect(window.confirm).toHaveBeenCalledWith(
       'Replace your current plan with the example week?',
     )
+    expect(
+      screen.getByText('Keep this task', { exact: true }),
+    ).toBeInTheDocument()
   })
 
   test('moves and completes a task while preserving scheduled totals', () => {
@@ -90,5 +101,9 @@ describe('WeekPlan accessible task workflow', () => {
     expect(screen.getByRole('alert')).not.toHaveTextContent(
       'Task added and saved',
     )
+    expect(
+      screen.queryByRole('checkbox', { name: 'Unsaved' }),
+    ).not.toBeInTheDocument()
+    expect(screen.getByLabelText(/Task title/)).toHaveValue('Unsaved')
   })
 })

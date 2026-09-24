@@ -96,6 +96,27 @@ describe('versioned persistence', () => {
     expect(result.warning).toMatch(/existing browser data was left unchanged/)
     expect(storage.getItem('weekplan:v1')).toBe('{not-json')
   })
+
+  test('rejects persisted effort above the safe integer boundary', () => {
+    const unsafePlan = {
+      ...validPlan,
+      tasks: [
+        {
+          ...validPlan.tasks[0],
+          effortMinutes: Number.MAX_SAFE_INTEGER + 1,
+        },
+      ],
+    }
+    storage.setItem(
+      'weekplan:v1',
+      JSON.stringify({ version: 1, plan: unsafePlan }),
+    )
+
+    expect(loadPlan(storage)).toMatchObject({
+      plan: null,
+      recoveryRequired: true,
+    })
+  })
 })
 
 describe('storage failures', () => {

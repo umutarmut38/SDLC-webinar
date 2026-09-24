@@ -13,7 +13,7 @@ export const validateTaskInput = (input: TaskInput): string | null => {
   if (!input.title.trim()) return 'Enter a task title.'
   if (
     !Number.isFinite(input.effortMinutes) ||
-    !Number.isInteger(input.effortMinutes) ||
+    !Number.isSafeInteger(input.effortMinutes) ||
     input.effortMinutes <= 0
   ) {
     return 'Effort must be a positive whole number of minutes.'

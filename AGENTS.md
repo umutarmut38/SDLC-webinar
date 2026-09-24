@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This repository is the intentionally empty application baseline for a roughly 30-minute Codex webinar. During the demo, Codex builds WeekPlan, a client-side weekly workload planner, validates it locally, opens a draft pull request, waits for CI, and runs up to two GitHub Copilot review/fix rounds live. Reserve roughly 20 minutes for the build/local checks/PR and 10 minutes for CI and remote review. There is no prepared application, package manifest, test suite, CI workflow, deployment workflow, or cloud integration.
+This repository contains WeekPlan, the client-side weekly workload planner built during a roughly 30-minute Codex webinar. The live workflow validates the app locally, opens a draft pull request, waits for CI, and runs up to two GitHub Copilot review/fix rounds. The prepared pre-build baseline intentionally omits the application, package manifest, test suite, and CI workflow; the completed demo branch contains them. There is no deployment workflow or cloud integration.
 
 `AGENTS.md` contains durable operating rules. `DEMO_PROMPT.md` is presenter input, not a skill or a source of reusable repository behavior.
 

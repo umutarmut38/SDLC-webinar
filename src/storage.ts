@@ -24,7 +24,7 @@ const isTask = (value: unknown): value is Task => {
     typeof task.id === 'string' &&
     typeof task.title === 'string' &&
     task.title.trim().length > 0 &&
-    Number.isInteger(task.effortMinutes) &&
+    Number.isSafeInteger(task.effortMinutes) &&
     Number(task.effortMinutes) > 0 &&
     (task.weekday === null || isWeekday(task.weekday)) &&
     typeof task.completed === 'boolean'

@@ -33,6 +33,13 @@ describe('task lifecycle and input validation', () => {
     expect(
       validateTaskInput({ title: 'Task', effortMinutes: 0, weekday: null }),
     ).toBe('Effort must be a positive whole number of minutes.')
+    expect(
+      validateTaskInput({
+        title: 'Task',
+        effortMinutes: Number.MAX_SAFE_INTEGER + 1,
+        weekday: null,
+      }),
+    ).toBe('Effort must be a positive whole number of minutes.')
   })
 
   test('adds, updates, completes, reopens, and deletes a task without changing other tasks', () => {
